@@ -107,6 +107,3 @@ ENV/
 
 # In-tree generated files
 */_version.py
-
-# Toy models
-toy_models/
