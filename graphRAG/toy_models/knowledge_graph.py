@@ -23,20 +23,37 @@ class ClassAndFunctionVisitor(ast.NodeVisitor):
         super().__init__()
 
     def parse_function(self, node):
+        if isinstance(node.returns, ast.Name): 
+            return_type = node.returns.id
+        elif isinstance(node.returns, ast.Constant):
+            return_type = node.returns.value
+        else: 
+            return_type = ""
         return {
             'name': node.name,
             'params': [{"name": arg.arg, "type": arg.annotation.id} for arg in node.args.args],
+            "return_type": return_type
+        }
+    
+    def parse_attribute(self, node):
+        return {
+            "name": node.targets[0].id,
+            "value": node.value.value
         }
     
     def parse_class(self, node): 
         class_info = {
             'name': node.name,
+            # TO DO: implement the Boost.Python.instance stuff 
             "bases": node.bases[0].id if isinstance(node.bases[0], ast.Name) else "",
-            'methods': []
+            'methods': [],
+            "class_attributes": []
         }
         for elem in node.body:
             if isinstance(elem, ast.FunctionDef):
                 class_info['methods'].append(self.parse_function(elem))
+            if isinstance(elem, ast.Assign):
+                class_info['class_attributes'].append(self.parse_attribute(elem))
         return class_info
 
     def visit_ClassDef(self, node):
@@ -55,6 +72,7 @@ class ClassAndFunctionVisitor(ast.NodeVisitor):
 
 
 def parse_files(path:str):
+    # TO DO: Parse docstrings/comments 
     file_pattern = os.path.join(path, '*.doc.py')
     file_list = glob.glob(file_pattern)
     all_files_info = {"classes": [], "functions": []}
@@ -67,7 +85,7 @@ def parse_files(path:str):
             tree = ast.parse(content)
         except SyntaxError as e:
             print(f'Syntax error in file {file_path}: {e}') 
-            # need to implement how to handle it if there is a reserved keyword used in the code
+            # TO DO: implement how to handle it if there is a reserved keyword used in the code
             continue
         # Create an instance of the visitor and visit the AST
         visitor = ClassAndFunctionVisitor()
