@@ -198,7 +198,9 @@ if __name__ == "__main__":
     driver = GraphDatabase.driver(uri, auth=(username, password))
 
     chem_folder_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/Chem"
+    pharm_folder_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/Pharm"
     all_files_info = {}
     all_files_info = parse_files(chem_folder_path, all_files_info)
+    all_files_info = parse_files(pharm_folder_path, all_files_info)
     driver.close()
 
