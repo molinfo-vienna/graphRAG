@@ -45,11 +45,10 @@ class ClassAndFunctionVisitor(ast.NodeVisitor):
     def parse_function(self, node):
         return_type = self.get_name(node.returns)
         params = self.parse_parameters(node)
-        if node.name == "copyAtomsIf": 
-            node
         return {
             'name': node.name,
             'params': params,
+            "decorators": [self.get_name(d) for d in node.decorator_list],
             "return_type": return_type
         }
     
@@ -59,27 +58,30 @@ class ClassAndFunctionVisitor(ast.NodeVisitor):
             "value": self.get_name(node.value)
         }
     
+    def traverse_body(self, info, node): 
+        for elem in node.body:
+            if isinstance(elem, ast.FunctionDef):
+                info['methods'].append(self.parse_function(elem))
+            elif isinstance(elem, ast.Assign):
+                info['class_attributes'].append(self.parse_attribute(elem))
+            elif isinstance(elem, ast.ClassDef):
+                nested_class_info = self.parse_class(elem)
+                info['nested_classes'].append(nested_class_info)
+
+    
     def parse_class(self, node): 
         class_info = {
             'name': node.name,
             "bases": [self.get_name(b) for b in node.bases],
+            "decorators": [self.get_name(d) for d in node.decorator_list],
             'methods': [],
             "class_attributes": [],
             "nested_classes": []
         }
-        for elem in node.body:
-            if isinstance(elem, ast.FunctionDef):
-                class_info['methods'].append(self.parse_function(elem))
-            elif isinstance(elem, ast.Assign):
-                class_info['class_attributes'].append(self.parse_attribute(elem))
-            elif isinstance(elem, ast.ClassDef):
-                nested_class_info = self.parse_class(elem)
-                class_info['nested_classes'].append(nested_class_info)
+        self.traverse_body(class_info, node)
         return class_info
 
     def visit_ClassDef(self, node):
-        if node.name == "Bond":
-            node
         self.class_stack.append(node.name)
         class_info = self.parse_class(node)
         if len(self.class_stack) == 1:  
@@ -110,13 +112,14 @@ def parse_files(path:str, all_files_info: dict):
             tree = ast.parse(content)
         except SyntaxError as e:
             try:
-                content = replace_naming_clash(content)
+                content = clean_unreadable_text(content)
+                if "DataFormat" in file_path:
+                    content
                 tree = ast.parse(content)
             except SyntaxError as e: 
                 print(f'Syntax error in file {file_path}: {e}') 
                 unreadable_files = unreadable_files + 1
                 continue
-            # TO DO: @staticmethods
             # TO DO: property() values for attributes, or in general ast.Call  
 
         # Create an instance of the visitor and visit the AST
@@ -127,6 +130,11 @@ def parse_files(path:str, all_files_info: dict):
     print(f"Amount of files that could not be parsed: {unreadable_files}")
     return all_files_info
 
+def clean_unreadable_text(text):
+    text = replace_naming_clash(text)
+    text = remove_empty_colon_parameters(text)
+    text = insert_default_strings(text)
+    return text
 
 def extract_cdpl_substring(path):
     # Regular expression to find the substring after 'CDPL/' until the next '/'
@@ -146,6 +154,20 @@ def replace_naming_clash(text):
     # Regular expression to find 'is' within parentheses and replace it with 'stream'
     # The regex looks for 'is' surrounded by parentheses, possibly with other text
     return re.sub(r'\(([^)]*?)\bis\b([^)]*?)\)', lambda match: f'({match.group(1)}stream{match.group(2)})', text)
+
+def remove_empty_colon_parameters(text):
+    # Remove function parameters that are just a colon
+    return re.sub(r'\(\s*:\s*\)', '()', text)
+
+def insert_default_strings(text):
+    def replacer(match):
+        before = match.group(1)
+        default_str = match.group(2)
+        after = match.group(3)
+        return f"({before}={default_str}{after})"
+    # Insert an = where there are default parameters with '' directly after the parameter name 
+    return re.sub(r"\(\s*([^)]*?mime_type)('[^=)]*?')([^)]*?)\)", replacer, text)
+
 
 '''
 def create_graph(tx):
