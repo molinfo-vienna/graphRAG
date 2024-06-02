@@ -7,6 +7,7 @@ import re
 
 # Define a visitor class that will collect class and function information
 class ClassAndFunctionVisitor(ast.NodeVisitor):
+    # TO DO: Write tests
     def __init__(self) -> None:
         self.classes = []
         self.functions = []
@@ -22,8 +23,7 @@ class ClassAndFunctionVisitor(ast.NodeVisitor):
         elif isinstance(node, ast.Attribute): 
             name = self.get_name(node.value) + "." + node.attr
         elif isinstance(node, ast.Call):
-            # TO DO: implement this 
-            name = ""
+            name = {"callable": self.get_name(node.func), "arguments": [self.get_name(arg) for arg in node.args]}
         else: 
             name = ""
         return name
@@ -113,14 +113,11 @@ def parse_files(path:str, all_files_info: dict):
         except SyntaxError as e:
             try:
                 content = clean_unreadable_text(content)
-                if "DataFormat" in file_path:
-                    content
                 tree = ast.parse(content)
             except SyntaxError as e: 
                 print(f'Syntax error in file {file_path}: {e}') 
                 unreadable_files = unreadable_files + 1
-                continue
-            # TO DO: property() values for attributes, or in general ast.Call  
+                continue 
 
         # Create an instance of the visitor and visit the AST
         visitor = ClassAndFunctionVisitor()
