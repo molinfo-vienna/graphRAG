@@ -16,18 +16,18 @@ class ClassAndFunctionVisitor(ast.NodeVisitor):
         if isinstance(node, ast.Name): 
             name = node.id
         elif isinstance(node, ast.Constant):
-            name = node.value
+            name =str(node.value)
         elif isinstance(node, ast.Attribute): 
             name = self.get_name(node.value) + "." + node.attr
         elif isinstance(node, ast.Call):
             name = {"callable": self.get_name(node.func), "arguments": [self.get_name(arg) for arg in node.args]}
         else: 
-            name = ""
+            name = "No value"
         return name
 
     def parse_parameters(self, node): 
         default_values = [self.get_name(d) for d in node.args.defaults]
-        params_with_defaults = [""] * (len(node.args.args) - len(default_values)) + default_values
+        params_with_defaults = ["No default"] * (len(node.args.args) - len(default_values)) + default_values
         params = []
         for i, arg in enumerate(node.args.args):
             param_info = {
