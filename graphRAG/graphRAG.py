@@ -180,10 +180,11 @@ def question_rag(user_prompt):
 
     final_answer = generate_answer(user_prompt, system_prompt_rag, pipe)
 
-    print("####################")
-    print("Question: ", user_prompt)
-    print("Answer: ", final_answer )
+    # print("####################")
+    # print("Question: ", user_prompt)
+    # print("Answer: ", final_answer )
+    return final_answer
 
 if __name__ == "__main__":
-    question_rag("What functions does the DefaultInteractionAnalyzer have?")
+    print(question_rag("What functions does the DefaultInteractionAnalyzer have?"))
 
