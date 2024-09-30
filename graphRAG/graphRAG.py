@@ -17,7 +17,27 @@ def read_query(driver, query, params=None):
             output.insert(0, result.keys())
             return output
     
-def generate_answer(user_prompt, system_prompt, pipe, **kwargs):
+def generate_answer_qwen(user_prompt, system_prompt, pipe, **kwargs):
+    # Use a more natural instruction format for Qwen-Chat or Qwen-Instruct
+    full_prompt = f"System: {system_prompt}\nUser: {user_prompt}\nAssistant:"
+ 
+
+    # Set a default max_new_tokens if not provided
+    if "max_new_tokens" not in kwargs:
+        kwargs["max_new_tokens"] = 512
+
+    # Generate the output using the pipeline
+    output = pipe(full_prompt,
+                  do_sample=True,
+                  top_k=10,
+                  top_p=0.95,
+                  **kwargs)
+    
+    # Extract the relevant part of the generated text
+    output = output[0]["generated_text"]
+    return output.split('Assistant:', 1)[1].strip()
+    
+def generate_answer_code_llama(user_prompt, system_prompt, pipe, **kwargs):
     full_prompt = "<s>[INST]<<SYS>>\n{system}\n<</SYS>>\n\n{user}[/INST]\n\n".format(system=f"{system_prompt}",
                                                                         user=f'{user_prompt}')
 
@@ -45,25 +65,6 @@ def schema_text(node_props, rels):
     {rels}
     """
 
-def get_graph_schema():
-    node_properties_query = """
-    CALL apoc.meta.data()
-    YIELD label, other, elementType, type, property
-    WHERE NOT type = "RELATIONSHIP" AND elementType = "node"
-    WITH label AS nodeLabels, collect(property) AS properties
-    RETURN {labels: nodeLabels, properties: properties} AS output
-    """
-    node_props = read_query(node_properties_query)
-
-    rel_query = """
-    CALL apoc.meta.data()
-    YIELD label, other, elementType, type, property
-    WHERE type = "RELATIONSHIP" AND elementType = "node"
-    RETURN {source: label, relationship: property, target: other} AS output
-    """
-    rels = read_query(rel_query)
-    return schema_text(node_props, rels)
-
 def generate_cypher_query_prompt(schema):
     return """
     You are an experienced graph databases developer. Provide answers in Cypher query language, based on the following graph Neo4j schema. Only answer with the query and nothing else.
@@ -79,35 +80,31 @@ def generate_cypher_query_prompt(schema):
     Q: List all functions declared in the file "Atom_Functions.doc.py".
     A: MATCH (f:Function)-[:DECLARED_AT]->(fi:File {{name: 'Atom_Functions.doc.py'}}) RETURN f.name
 
-    Q: What functions does the DefaultInteractionAnalyzer have? 
+    Q: What methods does the DefaultInteractionAnalyzer have? 
     A: MATCH (c:Class {{name: "DefaultInteractionAnalyzer"}})-[:HAS]->(f:Function) RETURN f.name
     """.format(schema = schema) 
 
-def generate_rag_prompt(retrieved_context):
+def generate_rag_prompt(retrieved_context, cypher_query):
     return """
 
-    You are an intelligent system. Your job is to answer user questions strictly based on the retrieved context 
-    from a Neo4j knowledge graph database. 
+    You are a highly intelligent assistant. Your job is to answer user questions using *only* the information from the retrieved context provided from a Neo4j knowledge graph database. 
+    The retrieved context is the result of a cypher query.
+    Ensure that your response strictly relies on the retrieved context, and do not add any information from other sources.
 
-    Your response should reflect the content of the retrieved context. Do not add any additional information.
-
-    ### Retrieved context:
-
+    Cypher query: 
+    {cypher_query}
+    Retrieved Context: 
     {retrieved_context}
 
     ### Example 1: 
     Q: What attributes does the class AtomConfiguration have? 
+    Cypher query: MATCH (c:Class {{name: 'AtomConfiguration'}}) RETURN c.attributes
     Retrieved Context: [['c.attributes'], ['[{{"name": "UNDEF", "value": "0"}}, 
     {{"name": "NONE", "value": "1"}}, {{"name": "R", "value": "2"}}, {{"name": "S", "value": "4"}}, 
     {{"name": "EITHER", "value": "8"}}, {{"name": "SP", "value": "16"}}, {{"name": "TB", "value": "20"}}, 
     {{"name": "OH", "value": "41"}}]']]
-    A: AtomConfiguration has the attributes UNDEF, NONE, R, S, EITHER, SP, TB and OH
-
-    ### Example 2:
-    Q: What attributes does the class AtomContainer have? 
-    Retrieved Context: [['c.attributes'], ['[{{"name": "numAtoms", "value": {{"callable": "property", "arguments": ["getNumAtoms"]}}}}]']]
-    A: AtomContainer has the attribute numAtoms.
-    """.format(retrieved_context = retrieved_context) 
+    A: AtomConfiguration has the attributes UNDEF, NONE, R, S, EITHER, SP, TB and OH.
+    """.format(retrieved_context = retrieved_context, cypher_query = cypher_query) 
            
 def initialize_neo4j():
     neo4j_uri = "neo4j+s://4de35fba.databases.neo4j.io"  
@@ -131,7 +128,7 @@ def get_pipeline_from_model(model):
 def get_cypher_query(user_prompt, pipe, schema):
     system_prompt_query= generate_cypher_query_prompt(schema)
 
-    cypher_query = generate_answer(user_prompt, system_prompt_query, pipe)
+    cypher_query = generate_answer_code_llama(user_prompt, system_prompt_query, pipe)
     print("Cypher query: ", cypher_query)
     return cypher_query
 
@@ -141,7 +138,7 @@ def retrieve_context(driver, user_prompt, pipe, schema):
     query_result = read_query(driver, cypher_query)
 
     print("Cypher query result: ", query_result)
-    return query_result
+    return query_result, cypher_query
 
 def question_rag(user_prompt):
     driver = initialize_neo4j()
@@ -162,29 +159,34 @@ def question_rag(user_prompt):
         {"relationship": "INCLUDED_IN", "source": "Folder", "target": "Project"},
         {"relationship": "INCLUDED_IN", "source": "File", "target": "Folder"},
         {"relationship": "INHERITS_FROM", "source": "Class", "target": "Class"},
-        {"relationship": "HAS", "source": "Class", "target": ["Function", "Class"]},
+        {"relationship": "HAS", "source": "Class", "target": ["Function", "Class", "Decorator"]},
         {"relationship": "DECLARED_AT", "source": "Class", "target": "File"},
         {"relationship": "HAS", "source": "Function", "target": "Decorator"},
+        {"relationship": "HAS", "source": "Function", "target": "Parameter"}
         {"relationship": "DECLARED_AT", "source": "Function", "target": "File"},
         {"relationship": "OF_TYPE", "source": "Parameter", "target": "Class"}
     ]
     """
 
-    model = "codellama/CodeLlama-13b-Instruct-hf"
+    model_cypher = "codellama/CodeLlama-13b-Instruct-hf"
+
+    model_answer = "Qwen/Qwen2.5-7B-Instruct"
     
-    pipe = get_pipeline_from_model(model)
+    pipe_cypher = get_pipeline_from_model(model_cypher)
 
-    query_result = retrieve_context(driver, user_prompt, pipe, schema)
+    pipe_answer = get_pipeline_from_model(model_answer)
 
-    system_prompt_rag = generate_rag_prompt(query_result)
+    query_result, cypher_query = retrieve_context(driver, user_prompt, pipe_cypher, schema)
 
-    final_answer = generate_answer(user_prompt, system_prompt_rag, pipe)
+    system_prompt_rag = generate_rag_prompt(query_result, cypher_query)
 
-    # print("####################")
-    # print("Question: ", user_prompt)
-    # print("Answer: ", final_answer )
-    return final_answer
+    final_answer = generate_answer_qwen(user_prompt, system_prompt_rag, pipe_answer)
+
+    print("####################")
+    print("Question: ", user_prompt)
+    print("Answer: ", final_answer )
+    return query_result
 
 if __name__ == "__main__":
-    print(question_rag("What functions does the DefaultInteractionAnalyzer have?"))
+    question_rag("List all functions declared in the file Atom_Functions.doc.py.")
 
