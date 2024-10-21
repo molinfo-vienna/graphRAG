@@ -97,7 +97,10 @@ class ClassAndFunctionVisitor(ast.NodeVisitor):
 
             elif comment.startswith("\\param"):
                 current_tag = "param"
-                current_param = comment.split()[1]
+                if len(comment.split()) > 1: 
+                    current_param = comment.split()[1]
+                else:
+                    continue
                 parsed_comments["param"][current_param] = comment.strip(f"\\param {current_param}").strip()
 
             elif comment.startswith("\\return"):
