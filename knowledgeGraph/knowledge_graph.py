@@ -20,7 +20,7 @@ class ProjectManager():
         result = tx.run(query, project_name=project_name)
         return result.single()
 
-class FolderManager(): 
+class FolderManager():  
     def __init__(self, driver, info_dict, project_name):
         self.driver = driver
         self.info_dict = info_dict
@@ -102,6 +102,7 @@ class FunctionManager():
                     function_return_type = json.dumps(f["return_type"])
                     self._create_function_node(tx, function_name, parameter_dict, function_decorators, function_return_type)
                     self._create_function_file_relationship(tx, function_name, parameter_dict, function_decorators, function_return_type, file_name)
+                    self._create_function_inputs(tx, f)
 
     def _create_function_node(self, tx, function_name, parameter_dict, decorator_list, return_type):
         query = """
@@ -183,7 +184,7 @@ class ClassManager():
     def _create_class_file_relationship(self, tx, file_name, class_name): 
         query = """
         MATCH (fo:File {name: $file_name}), (fi:Class {name: $class_name})
-        CREATE (fi)-[:DECLARED_AT]->(fo)
+        MERGE (fi)-[:DECLARED_AT]->(fo)
         """
         tx.run(query, file_name=file_name, class_name=class_name)
 
@@ -265,7 +266,7 @@ class ParameterManager():
         
     def _create_parameter_function_relationship(self, tx, function_name,  parameter_dict, decorator_list, return_type, parameter_name, parameter_type, parameter_default): 
         query = """
-        MATCH (fo:Function {name: $function_name, parameter: $parameter_dict, decorators: $decorator_list, return_type: $return_type}), (fi:Parameter {name: $param_name, type: $type_name, default: $default_value})
+        MATCH (fo:Function {name: $function_name, parameter: $parameter_dict, decorators: $decorator_list, returns: $return_type}), (fi:Parameter {name: $param_name, type: $type_name, default: $default_value})
         MERGE (fo)-[:HAS]->(fi)
         """
         tx.run(query,function_name=function_name, parameter_dict=parameter_dict, decorator_list=decorator_list, return_type=return_type, param_name=parameter_name, type_name=parameter_type, default_value=parameter_default)
@@ -327,8 +328,8 @@ if __name__ == "__main__":
     pharm_folder_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/Pharm"
     base_folder_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/Base"
     all_files_info = DocParser(chem_folder_path).parse_files()
-    all_files_info = DocParser(pharm_folder_path, all_files_info).parse_files()
-    all_files_info = DocParser(base_folder_path, all_files_info).parse_files()
+    # all_files_info = DocParser(pharm_folder_path, all_files_info).parse_files()
+    # all_files_info = DocParser(base_folder_path, all_files_info).parse_files()
     # cdpkit_graph_manager = KnowledgeGraphManager(uri, username, password, project_name="CDPKit", info_dict=all_files_info)
     # cdpkit_graph_manager.clean_database()
     # cdpkit_graph_manager.create_graph()
