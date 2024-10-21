@@ -2,6 +2,8 @@ import os
 import glob
 import ast
 import re
+import tokenize
+from io import StringIO
 from ClassAndFunctionVisitor import ClassAndFunctionVisitor
 
 class DocParser(): 
@@ -23,6 +25,7 @@ class DocParser():
             # Open and read the text file
             with open(file_path, 'r') as f:
                 content = f.read()
+                comments = self.extract_comments(content)
             try: 
                 tree = ast.parse(content)
             except SyntaxError as e:
@@ -35,12 +38,20 @@ class DocParser():
                     continue 
 
             # Create an instance of the visitor and visit the AST
-            visitor = ClassAndFunctionVisitor()
+            visitor = ClassAndFunctionVisitor(comments)
             visitor.visit(tree)
             file_name = self.extract_doc_py_filename(file_path)
             self.all_files_info[folder][file_name] = {"classes": visitor.classes, "functions": visitor.functions }
         print(f"Amount of files that could not be parsed: {unreadable_files}")
         return self.all_files_info
+    
+    def extract_comments(self, text):
+        comments = []
+        tokens = tokenize.generate_tokens(StringIO(text).readline)
+        for tok_type, tok_string, start, _, _ in tokens:
+            if tok_type == tokenize.COMMENT:
+                comments.append((start[0], tok_string.strip()))
+        return comments
 
     def clean_unreadable_text(self,text):
         text = self.replace_naming_clash(text)
