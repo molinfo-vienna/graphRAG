@@ -50,7 +50,7 @@ class ClassAndFunctionVisitor(ast.NodeVisitor):
             'params': params,
             "decorators": [self.get_name(d) for d in node.decorator_list],
             "return_type": {"type": return_type, "comment": parsed_comments.get("return", "")},
-            "comment:": parsed_comments.get("brief", "")
+            "comment": parsed_comments.get("brief", "")
         }
     
     def parse_attribute(self, node):
