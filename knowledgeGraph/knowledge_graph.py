@@ -337,14 +337,24 @@ if __name__ == "__main__":
     uri = "neo4j+s://4de35fba.databases.neo4j.io"  
     username = "neo4j"  
     password = "87YkRGzIftmB-QU8CvYcLNzHZeFAZkeEQpwtZTEa4PU"  
-    chem_folder_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/Chem"
-    pharm_folder_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/Pharm"
-    base_folder_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/Base"
-    all_files_info = DocParser(chem_folder_path).parse_files()
-    # all_files_info = DocParser(pharm_folder_path, all_files_info).parse_files()
-    # all_files_info = DocParser(base_folder_path, all_files_info).parse_files()
-    cdpkit_graph_manager = KnowledgeGraphManager(uri, username, password, project_name="CDPKit", info_dict=all_files_info)
-    cdpkit_graph_manager.clean_database()
-    cdpkit_graph_manager.create_graph()
-    cdpkit_graph_manager.close()
+    root_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/"
+    cdp_folders = [root_path + "Chem",
+                   root_path + "Pharm",
+                   root_path + "Base", 
+                   root_path + "Biomol",
+                   root_path + "ConfGen",
+                   root_path + "Descr",
+                   root_path + "ForceField",
+                   root_path + "GRAIL",
+                   root_path + "Grid",
+                   root_path + "Math",
+                   root_path + "MolProp",
+                   root_path + "Shape",
+                   root_path + "Util",
+                   root_path + "Vis"]
+    for folder in cdp_folders: 
+        all_files_info = DocParser(folder).parse_files()
+        cdpkit_graph_manager = KnowledgeGraphManager(uri, username, password, project_name="CDPKit", info_dict=all_files_info)
+        cdpkit_graph_manager.create_graph()
+        cdpkit_graph_manager.close()
 

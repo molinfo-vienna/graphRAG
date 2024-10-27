@@ -1,0 +1,30 @@
+What are the folders included in the CDPKit Project? 
+What files are included in the folder Base?
+Where is the file ControlParameter.doc.py? 
+In which file is the function findResidue declared at? 
+Where is class AromaticRingSet declared at? 
+What class does the class AromaticRingSet inherit from? 
+What methods does the class AtomBondMapping have? 
+What methods does the class BasicBond have and what do they do? 
+What parameters does calcGeometricalDiameter take? 
+What is the method calculate of the class MolecularComplexityCalculator good for? 
+Does the parameter atom of the function hasUFFType have a default value? 
+What default value does parameter type of the function setUFFType have? 
+What does the function getMMFF94TypeIndex return? 
+What can you tell me about the class InteractionType? 
+What attributes does DataFormat have? 
+Whats the meaning of the attribute R of class AtomConfiguration?
+Does getForceConstant have a decorator? 
+What type is parameter feature of function perceiveExtendedType?
+What does the parameter feature of function hasHydrophobicity stand for? 
+In what functions does the parameter feature appear? 
+What functions are in the file Feature_Functions.doc.py? 
+What type does getFeatures return? 
+What kind of decorators are there? 
+What classes inherit from BasicFeature? 
+What classes use the method applyConfiguration and what does it do?
+How many parameters does norm1 take? 
+Is getObjectID a staticmethod? 
+Can the method __add__ of the class ConstLMatrixTranspose take an integer for the parameter e?
+How does the method assign of the class MassComposition work? 
+How can I use the class ElementHistogram? 

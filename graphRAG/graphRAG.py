@@ -1,13 +1,15 @@
 import os
 os.environ['HF_HOME'] = '/data/local/sschoendorfer'
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 from huggingface_hub import hf_hub_download
 from neo4j import GraphDatabase
 from transformers import AutoTokenizer, pipeline
 import torch
 import pandas as pd
+import json
 
-# Try according to this article
+# Base idea from this article: 
 # https://medium.com/@silviaonofrei/code-llamas-knowledge-of-neo4j-s-cypher-query-language-54783d2ad421
 
 def read_query(driver, query, params=None):
@@ -44,11 +46,13 @@ def generate_answer_code_llama(user_prompt, system_prompt, pipe, **kwargs):
     # The default max length is pretty small, increase the threshold
     if "max_new_tokens" not in kwargs:
         kwargs["max_new_tokens"] = 512
+    
+    kwargs.setdefault("temperature", 0.7)
 
     output = pipe(full_prompt,
                       do_sample=True,
-                      top_k=10,
-                      top_p=0.95,
+                      top_k=5,
+                      top_p=0.9,
                       **kwargs)
     
     output = output[0]["generated_text"]
@@ -67,21 +71,18 @@ def schema_text(node_props, rels):
 
 def generate_cypher_query_prompt(schema):
     return """
-    You are an experienced graph databases developer. Provide answers in Cypher query language, based on the following graph Neo4j schema. Only answer with the query and nothing else.
+    You are experienced with cypher queries. Provide answers in Cypher query language, *strictly* based on the following graph Neo4j schema. Respect the possible direction of relationships and the possible naming of nodes, properties and relationships. Only answer with the query and nothing else.
 
     ### The Schema
 
     {schema}
 
     ### Examples 
-    Q: What attributes does AtomConfiguration have?
-    A: MATCH (c:Class {{name: 'AtomConfiguration'}}) RETURN c.attributes
+    Q: What methods does AromaticSubstructure have?
+    A: MATCH (c:Class {{name: 'AromaticSubstructure'}})-[:HAS]->(f:Function) RETURN f.name, f.comment
 
-    Q: List all functions declared in the file "Atom_Functions.doc.py".
-    A: MATCH (f:Function)-[:DECLARED_AT]->(fi:File {{name: 'Atom_Functions.doc.py'}}) RETURN f.name
-
-    Q: What methods does the DefaultInteractionAnalyzer have? 
-    A: MATCH (c:Class {{name: "DefaultInteractionAnalyzer"}})-[:HAS]->(f:Function) RETURN f.name
+    Q: What does the class AtomPredicate do?
+    A: MATCH (c:Class {{name: "AtomPredicate"}}) RETURN c.comment
     """.format(schema = schema) 
 
 def generate_rag_prompt(retrieved_context, cypher_query):
@@ -97,13 +98,13 @@ def generate_rag_prompt(retrieved_context, cypher_query):
     {retrieved_context}
 
     ### Example 1: 
-    Q: What attributes does the class AtomConfiguration have? 
-    Cypher query: MATCH (c:Class {{name: 'AtomConfiguration'}}) RETURN c.attributes
-    Retrieved Context: [['c.attributes'], ['[{{"name": "UNDEF", "value": "0"}}, 
-    {{"name": "NONE", "value": "1"}}, {{"name": "R", "value": "2"}}, {{"name": "S", "value": "4"}}, 
-    {{"name": "EITHER", "value": "8"}}, {{"name": "SP", "value": "16"}}, {{"name": "TB", "value": "20"}}, 
-    {{"name": "OH", "value": "41"}}]']]
-    A: AtomConfiguration has the attributes UNDEF, NONE, R, S, EITHER, SP, TB and OH.
+    Q: What methods does AromaticSubstructure have?
+    Cypher query: MATCH (c:Class {{name: 'AromaticSubstructure'}})-[:HAS]->(f:Function) RETURN f.name, f.comment
+    [['f.name', 'f.comment'], ['__init__', 'Constructs an empty <tt>AromaticSubstructure</tt> instance.'], ['__init__', 'Construct a <tt>AromaticSubstructure</tt> instance that consists of the aromatic atoms and bonds of the molecular graph <em>molgraph</em>.'], ['perceive', 'Replaces the currently stored atoms and bonds by the set of aromatic atoms and bonds of the molecular graph <em>molgraph</em>.']]
+    A: AromaticSubstructure has the following methods:
+    - __init__: Constructs an empty <tt>AromaticSubstructure</tt> instance.
+    - __init__: Construct a <tt>AromaticSubstructure</tt> instance that consists of the aromatic atoms and bonds of the molecular graph <em>molgraph</em>.
+    - perceive: Replaces the currently stored atoms and bonds by the set of aromatic atoms and bonds of the molecular graph <em>molgraph</em>.
     """.format(retrieved_context = retrieved_context, cypher_query = cypher_query) 
            
 def initialize_neo4j():
@@ -129,7 +130,7 @@ def get_cypher_query(user_prompt, pipe, schema):
     system_prompt_query= generate_cypher_query_prompt(schema)
 
     cypher_query = generate_answer_code_llama(user_prompt, system_prompt_query, pipe)
-    print("Cypher query: ", cypher_query)
+    # print("Cypher query: ", cypher_query)
     return cypher_query
 
 def retrieve_context(driver, user_prompt, pipe, schema): 
@@ -137,10 +138,10 @@ def retrieve_context(driver, user_prompt, pipe, schema):
 
     query_result = read_query(driver, cypher_query)
 
-    print("Cypher query result: ", query_result)
+    # print("Cypher query result: ", query_result)
     return query_result, cypher_query
 
-def question_rag(user_prompt):
+def question_rag(user_prompt, pipe_cypher, pipe_answer):
     driver = initialize_neo4j()
     schema = """
     Node properties are the following:
@@ -148,9 +149,9 @@ def question_rag(user_prompt):
         {"labels": "Project", "properties": ["name"]},
         {"labels": "Folder", "properties": ["name"]},
         {"labels": "File", "properties": ["name"]},
-        {"labels": "Class", "properties": ["name", "attributes"]},
-        {"labels": "Function", "properties": ["name", "parameter", "decorators", "returns"]},
-        {"labels": "Parameter", "properties": ["name", "default", "type"]},
+        {"labels": "Class", "properties": ["name", "comment", "attributes"]},
+        {"labels": "Function", "properties": ["name", "comment", "parameter", "decorators", "returns"]},
+        {"labels": "Parameter", "properties": ["name", "comment", "default", "type"]},
         {"labels": "Decorator", "properties": ["name"]}
     ]
 
@@ -168,6 +169,36 @@ def question_rag(user_prompt):
     ]
     """
 
+    try: 
+        query_result, cypher_query = retrieve_context(driver, user_prompt, pipe_cypher, schema)
+    except: 
+        query_result = "Context could not be retrieved"
+        cypher_query = "None"
+        
+    system_prompt_rag = generate_rag_prompt(query_result, cypher_query)
+
+    final_answer = generate_answer_qwen(user_prompt, system_prompt_rag, pipe_answer)
+
+    #print("####################")
+    #print("Question: ", user_prompt)
+    #print("Answer: ", final_answer )
+    return cypher_query, final_answer
+
+def benchmark_rag(pipe_cypher, pipe_answer):
+    with open("/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_questions.txt", "r") as f: 
+        questions = f.readlines()
+    
+    benchmark = []
+    for question in questions:
+        cypher_query, final_answer = question_rag(question, pipe_cypher, pipe_answer)
+        benchmark.append({"user_prompt": question, "cypher_query": cypher_query, 
+                          "final_answer": final_answer})
+
+    with open("/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_results.json", "w") as file:
+        json.dump(benchmark, file, indent=4)
+
+
+if __name__ == "__main__":
     model_cypher = "codellama/CodeLlama-13b-Instruct-hf"
 
     model_answer = "Qwen/Qwen2.5-7B-Instruct"
@@ -176,17 +207,4 @@ def question_rag(user_prompt):
 
     pipe_answer = get_pipeline_from_model(model_answer)
 
-    query_result, cypher_query = retrieve_context(driver, user_prompt, pipe_cypher, schema)
-
-    system_prompt_rag = generate_rag_prompt(query_result, cypher_query)
-
-    final_answer = generate_answer_qwen(user_prompt, system_prompt_rag, pipe_answer)
-
-    print("####################")
-    print("Question: ", user_prompt)
-    print("Answer: ", final_answer )
-    return query_result
-
-if __name__ == "__main__":
-    question_rag("List all functions declared in the file Atom_Functions.doc.py.")
 
