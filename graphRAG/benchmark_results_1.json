@@ -2,151 +2,181 @@
     {
         "user_prompt": "What are the folders included in the CDPKit Project? \n",
         "cypher_query": "\n\nMATCH (f:Folder)-[:INCLUDED_IN]->(p:Project {name: 'CDPKit'}) RETURN f.name",
-        "final_answer": "The folders included in the CDPKit Project are:\n- Chem\n- Pharm\n- Base\n- Biomol\n- ConFGen\n- ConfGen\n- Descr\n- ForceField\n- GRAIL\n- Grid\n- Math\n- MolProp\n- Shape\n- Util\n- Vis"
+        "final_answer": "The folders included in the CDPKit Project are:\n- Chem\n- Pharm\n- Base\n- Biomol\n- ConFGen\n- ConfGen\n- Descr\n- ForceField\n- GRAIL\n- Grid\n- Math\n- MolProp\n- Shape\n- Util\n- Vis",
+        "score": ""
     },
     {
         "user_prompt": "What files are included in the folder Base?\n",
         "cypher_query": "\n\nMATCH (f:File)-[:INCLUDED_IN]->(folder:Folder {name: 'Base'}) RETURN f.name",
-        "final_answer": "The files included in the folder Base are:\n- Package.doc.py\n- Variables.doc.py\n- DataFormat.doc.py\n- ValueError.doc.py\n- VoidLookupKeyAnyFunctor.doc.py\n- PropertyContainer.doc.py\n- ControlParameterContainer.doc.py\n- FileIOStream.doc.py\n- VoidDataIOBaseFunctor.doc.py\n- CalculationFailed.doc.py\n- Exception.doc.py\n- OStream.doc.py\n- DataIOBase.doc.py\n- OperationFailed.doc.py\n- IndexError.doc.py\n- ItemNotFound.doc.py\n- BadCast.doc.py\n- NullPointerException.doc.py\n- IStream.doc.py\n- Any.doc.py\n- SizeError.doc.py\n- VoidLookupKeyFunctor.doc.py\n- LookupKey.doc.py\n- StringIOStream.doc.py\n- RangeError.doc.py\n- IOError.doc.py\n- ControlParameterList.doc.py\n- IOStream.doc.py\n- VoidFunctor.doc.py"
+        "final_answer": "The files included in the folder Base are:\n- Package.doc.py\n- Variables.doc.py\n- DataFormat.doc.py\n- ValueError.doc.py\n- VoidLookupKeyAnyFunctor.doc.py\n- PropertyContainer.doc.py\n- ControlParameterContainer.doc.py\n- FileIOStream.doc.py\n- VoidDataIOBaseFunctor.doc.py\n- CalculationFailed.doc.py\n- Exception.doc.py\n- OStream.doc.py\n- DataIOBase.doc.py\n- OperationFailed.doc.py\n- IndexError.doc.py\n- ItemNotFound.doc.py\n- BadCast.doc.py\n- NullPointerException.doc.py\n- IStream.doc.py\n- Any.doc.py\n- SizeError.doc.py\n- VoidLookupKeyFunctor.doc.py\n- LookupKey.doc.py\n- StringIOStream.doc.py\n- RangeError.doc.py\n- IOError.doc.py\n- ControlParameterList.doc.py\n- IOStream.doc.py\n- VoidFunctor.doc.py",
+        "score": ""
     },
     {
         "user_prompt": "Where is the file ControlParameter.doc.py? \n",
         "cypher_query": "\n\nMATCH (f:File {name: \"ControlParameter.doc.py\"}) RETURN f",
-        "final_answer": "The file ControlParameter.doc.py is located at element_id '4:1d224c51-ee48-4361-8052-4a125215d86f:648'."
+        "final_answer": "The file ControlParameter.doc.py is located at element_id '4:1d224c51-ee48-4361-8052-4a125215d86f:648'.",
+        "score": ""
     },
     {
         "user_prompt": "In which file is the function findResidue declared at? \n",
         "cypher_query": "\n\nMATCH (f:Function {name: \"findResidue\"})-[:DECLARED_AT]->(f:File) RETURN f.name",
-        "final_answer": "The function `findResidue` is declared in the file named in the retrieved context, which is:\n\n- `f.name` (the name of the file)"
+        "final_answer": "The function `findResidue` is declared in the file named in the retrieved context, which is:\n\n- `f.name` (the name of the file)",
+        "score": "" 
     },
     {
         "user_prompt": "Where is class AromaticRingSet declared at? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"AromaticRingSet\"})-[:DECLARED_AT]->(f:File) RETURN f.name",
-        "final_answer": "Class AromaticRingSet is declared in the file AromaticRingSet.doc.py."
+        "final_answer": "Class AromaticRingSet is declared in the file AromaticRingSet.doc.py.",
+        "score": ""
     },
     {
         "user_prompt": "What class does the class AromaticRingSet inherit from? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"AromaticRingSet\"})-[:INHERITS_FROM]->(p:Class) RETURN p.name",
-        "final_answer": "The class AromaticRingSet inherits from FragmentList."
+        "final_answer": "The class AromaticRingSet inherits from FragmentList.",
+        "score": ""
     },
     {
         "user_prompt": "What methods does the class AtomBondMapping have? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"AtomBondMapping\"})-[:HAS]->(f:Function) RETURN f.name, f.comment",
-        "final_answer": "The class AtomBondMapping has the following methods:\n- __init__: Initializes the \\e AtomBondMapping instance.\n- __init__: Initializes a copy of the \\e AtomBondMapping instance \\a mapping.\n- getObjectID: Returns the numeric identifier (ID) of the wrapped C++ class instance. Different Python AtomBondMapping instances may reference the same underlying C++ class instance. The commonly used Python expression `a is not b` thus cannot tell reliably whether the two AtomBondMapping instances \\e a and \\e b reference different C++ objects. The numeric identifier returned by this method allows to correctly implement such an identity test via the simple expression `a.getObjectID()!= b.getObjectID()`.\n- assign: Replaces the current state of \\a self with a copy of the state of the \\e AtomBondMapping instance \\a mapping.\n- getAtomMapping: Returns a reference to the Chem.AtomMapping data member storing the atom to atom mappings.\n- getBondMapping: Returns a reference to the Chem.BondMapping data member storing the bond to bond mappings.\n- clear: Removes all atom to atom and bond to bond mappings.\n- __eq__: Equality comparison operator.\n- __ne__: Inequality comparison operator. The result is equivalent to `!(self == mapping)`."
+        "final_answer": "The class AtomBondMapping has the following methods:\n- __init__: Initializes the \\e AtomBondMapping instance.\n- __init__: Initializes a copy of the \\e AtomBondMapping instance \\a mapping.\n- getObjectID: Returns the numeric identifier (ID) of the wrapped C++ class instance. Different Python AtomBondMapping instances may reference the same underlying C++ class instance. The commonly used Python expression `a is not b` thus cannot tell reliably whether the two AtomBondMapping instances \\e a and \\e b reference different C++ objects. The numeric identifier returned by this method allows to correctly implement such an identity test via the simple expression `a.getObjectID()!= b.getObjectID()`.\n- assign: Replaces the current state of \\a self with a copy of the state of the \\e AtomBondMapping instance \\a mapping.\n- getAtomMapping: Returns a reference to the Chem.AtomMapping data member storing the atom to atom mappings.\n- getBondMapping: Returns a reference to the Chem.BondMapping data member storing the bond to bond mappings.\n- clear: Removes all atom to atom and bond to bond mappings.\n- __eq__: Equality comparison operator.\n- __ne__: Inequality comparison operator. The result is equivalent to `!(self == mapping)`.",
+        "score": ""
     },
     {
         "user_prompt": "What methods does the class BasicBond have and what do they do? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: 'BasicBond'})-[:HAS]->(f:Function) RETURN f.name, f.comment",
-        "final_answer": "The class BasicBond has the following method:\n- assign: Assignment operator that replaces the current set of properties with the properties of <em>bond</em>. This method is defined twice in the context provided, but the description is the same for both instances."
+        "final_answer": "The class BasicBond has the following method:\n- assign: Assignment operator that replaces the current set of properties with the properties of <em>bond</em>. This method is defined twice in the context provided, but the description is the same for both instances.",
+        "score": ""
     },
     {
         "user_prompt": "What parameters does calcGeometricalDiameter take? \n",
         "cypher_query": "\n\nMATCH (f:Function {name: \"calcGeometricalDiameter\"})-[:HAS]->(p:Parameter) RETURN p.name, p.type, p.comment",
-        "final_answer": "Based on the retrieved context, the function `calcGeometricalDiameter` takes the following parameters:\n\n- `cntnr`: of type `Chem.Entity3DContainer` or `Chem.AtomContainer`\n- `coords_func`: of type `Chem.Atom3DCoordinatesFunction` (with no comment provided) \n\nThese parameters are necessary for calculating the geometrical diameter."
+        "final_answer": "Based on the retrieved context, the function `calcGeometricalDiameter` takes the following parameters:\n\n- `cntnr`: of type `Chem.Entity3DContainer` or `Chem.AtomContainer`\n- `coords_func`: of type `Chem.Atom3DCoordinatesFunction` (with no comment provided) \n\nThese parameters are necessary for calculating the geometrical diameter.", 
+        "score": ""
     },
     {
         "user_prompt": "What is the method calculate of the class MolecularComplexityCalculator good for? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"MolecularComplexityCalculator\"})-[:HAS]->(f:Function {name: \"calculate\"}) RETURN f.comment",
-        "final_answer": "The method `calculate` of the class `MolecularComplexityCalculator` is good for calculating the complexity of the molecular graph `molgraph`."
+        "final_answer": "The method `calculate` of the class `MolecularComplexityCalculator` is good for calculating the complexity of the molecular graph `molgraph`.",
+        "score": ""
     },
     {
         "user_prompt": "Does the parameter atom of the function hasUFFType have a default value? \n",
         "cypher_query": "\n\nMATCH (f:Function {name: 'hasUFFType'})-[:HAS]->(p:Parameter {name: 'atom'}) RETURN p.default",
-        "final_answer": "Yes, the parameter atom of the function hasUFFType does not have a default value. The default value for this parameter is \"No default\"."
+        "final_answer": "Yes, the parameter atom of the function hasUFFType does not have a default value. The default value for this parameter is \"No default\".",
+        "score": ""
     },
     {
         "user_prompt": "What default value does parameter type of the function setUFFType have? \n",
         "cypher_query": "\n\nMATCH (f:Function {name: \"setUFFType\"})-[:HAS]->(p:Parameter) RETURN p.name, p.default",
-        "final_answer": "The parameter `type` of the function `setUFFType` has no default value. This is indicated by the retrieved context where both `p.name` and `p.default` for `type` are listed as `\"No default\"`. \n\nTherefore, the answer is that the parameter `type` does not have a default value."
+        "final_answer": "The parameter `type` of the function `setUFFType` has no default value. This is indicated by the retrieved context where both `p.name` and `p.default` for `type` are listed as `\"No default\"`. \n\nTherefore, the answer is that the parameter `type` does not have a default value.",
+        "score": ""
     },
     {
         "user_prompt": "What does the function getMMFF94TypeIndex return? \n",
         "cypher_query": "\n\nMATCH (f:Function {name: \"getMMFF94TypeIndex\"}) RETURN f.returns",
-        "final_answer": "The function getMMFF94TypeIndex returns an integer (`int`). There is no additional comment provided for the return type."
+        "final_answer": "The function getMMFF94TypeIndex returns an integer (`int`). There is no additional comment provided for the return type.",
+        "score": ""
     },
     {
         "user_prompt": "What can you tell me about the class InteractionType? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"InteractionType\"}) RETURN c.comment, c.attributes",
-        "final_answer": "The class `InteractionType` provides flags for the specification of a set of force field interaction types. It includes the following attributes:\n\n- **NONE**: Value `0`\n- **BOND_STRETCHING**: Value `1`\n- **ANGLE_BENDING**: Value `2`\n- **STRETCH_BEND**: Value `4`\n- **OUT_OF_PLANE_BENDING**: Value `8`\n- **TORSION**: Value `16`\n- **VAN_DER_WAALS**: Value `32`\n- **ELECTROSTATIC**: Value `64`\n- **ALL**: Value `127` \n\nThese attributes are used to define different types of interactions in a force field model."
+        "final_answer": "The class `InteractionType` provides flags for the specification of a set of force field interaction types. It includes the following attributes:\n\n- **NONE**: Value `0`\n- **BOND_STRETCHING**: Value `1`\n- **ANGLE_BENDING**: Value `2`\n- **STRETCH_BEND**: Value `4`\n- **OUT_OF_PLANE_BENDING**: Value `8`\n- **TORSION**: Value `16`\n- **VAN_DER_WAALS**: Value `32`\n- **ELECTROSTATIC**: Value `64`\n- **ALL**: Value `127` \n\nThese attributes are used to define different types of interactions in a force field model.",
+        "score": ""
     },
     {
         "user_prompt": "What attributes does DataFormat have? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"DataFormat\"})-[:HAS]->(a:Attribute) RETURN a.name, a.comment",
-        "final_answer": "DataFormat has the following attributes:\n- a.name: a.comment\n- (no specific attribute names or comments provided in the context) Based on the retrieved context, there are no specific attribute names or comments associated with the DataFormat class. The context only shows a generic structure for attributes but does not provide actual data."
+        "final_answer": "DataFormat has the following attributes:\n- a.name: a.comment\n- (no specific attribute names or comments provided in the context) Based on the retrieved context, there are no specific attribute names or comments associated with the DataFormat class. The context only shows a generic structure for attributes but does not provide actual data.",
+        "score": ""
     },
     {
         "user_prompt": "Whats the meaning of the attribute R of class AtomConfiguration?\n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"AtomConfiguration\"})-[:HAS]->(p:Parameter {name: \"R\"}) RETURN p.comment",
-        "final_answer": "The attribute R of class AtomConfiguration has the following comment: `p.comment`. However, the specific comment value is not provided in the retrieved context. Therefore, based solely on the retrieved context, we cannot determine the exact meaning of the attribute R. If you need more information, please provide additional details or run a different query. \n\nFrom the available context:\n```cypher\n[['p.comment']]\n``` \nNo further detail can be given about the attribute R's meaning."
+        "final_answer": "The attribute R of class AtomConfiguration has the following comment: `p.comment`. However, the specific comment value is not provided in the retrieved context. Therefore, based solely on the retrieved context, we cannot determine the exact meaning of the attribute R. If you need more information, please provide additional details or run a different query. \n\nFrom the available context:\n```cypher\n[['p.comment']]\n``` \nNo further detail can be given about the attribute R's meaning.",
+        "score": ""
     },
     {
         "user_prompt": "Does getForceConstant have a decorator? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"ForceConstant\"})-[:HAS]->(f:Function)<-[:HAS]-(d:Decorator)\nRETURN d.name",
-        "final_answer": "No, getForceConstant does not have a decorator based on the provided context. There are no decorators associated with the ForceConstant class in the retrieved data."
+        "final_answer": "No, getForceConstant does not have a decorator based on the provided context. There are no decorators associated with the ForceConstant class in the retrieved data.",
+        "score": ""
     },
     {
         "user_prompt": "What type is parameter feature of function perceiveExtendedType?\n",
         "cypher_query": "\n\nMATCH (f:Function {name: \"perceiveExtendedType\"})-[:HAS]->(p:Parameter) RETURN p.type",
-        "final_answer": "The parameter feature of the function perceiveExtendedType has the type \"Pharm.Feature\"."
+        "final_answer": "The parameter feature of the function perceiveExtendedType has the type \"Pharm.Feature\".",
+        "score": ""
     },
     {
         "user_prompt": "What does the parameter feature of function hasHydrophobicity stand for? \n",
         "cypher_query": "\n\nMATCH (f:Function {name: \"hasHydrophobicity\"})-[:HAS]->(p:Parameter {name: \"feature\"}) RETURN p.comment",
-        "final_answer": "The parameter feature of the function hasHydrophobicity stands for: (empty comment)"
+        "final_answer": "The parameter feature of the function hasHydrophobicity stands for: (empty comment)",
+        "score": ""
     },
     {
         "user_prompt": "In what functions does the parameter feature appear? \n",
         "cypher_query": "\n\nMATCH (p:Parameter {name: \"feature\"})-[:HAS]->(f:Function) RETURN f.name, f.comment",
-        "final_answer": "The parameter feature appears in the following functions:\n\n- f.name: feature\n- f.comment: This function utilizes the feature parameter to perform some operation or analysis. The exact nature of the operation depends on the specific function."
+        "final_answer": "The parameter feature appears in the following functions:\n\n- f.name: feature\n- f.comment: This function utilizes the feature parameter to perform some operation or analysis. The exact nature of the operation depends on the specific function.",
+        "score": ""
     },
     {
         "user_prompt": "What functions are in the file Feature_Functions.doc.py? \n",
         "cypher_query": "\n\nMATCH (f:File {name: \"Feature_Functions.doc.py\"})-[:INCLUDED_IN]->(p:Project)<-[:INCLUDED_IN]-(f:File)<-[:HAS]-(f:Function) RETURN f.name, f.comment",
-        "final_answer": "The file Feature_Functions.doc.py contains the following function:\n\n- name: Feature_Functions.doc.py\n- comment: No comment available. To provide more details about the functions within this file, a different query targeting the specific functions would be required."
+        "final_answer": "The file Feature_Functions.doc.py contains the following function:\n\n- name: Feature_Functions.doc.py\n- comment: No comment available. To provide more details about the functions within this file, a different query targeting the specific functions would be required.",
+        "score": ""
     },
     {
         "user_prompt": "What type does getFeatures return? \n",
         "cypher_query": "\n\nMATCH (f:Function {name: 'getFeatures'})-[:HAS]->(p:Parameter) RETURN p.type",
-        "final_answer": "getFeatures returns types including \"FeatureSet\", \"FeatureMapping\", and \"bool\"."
+        "final_answer": "getFeatures returns types including \"FeatureSet\", \"FeatureMapping\", and \"bool\".",
+        "score": ""
     },
     {
         "user_prompt": "What kind of decorators are there? \n",
         "cypher_query": "\n\nMATCH (d:Decorator) RETURN d.name",
-        "final_answer": "The decorators available are:\n- staticmethod\n\nThis information is based solely on the retrieved context from the Neo4j knowledge graph database."
+        "final_answer": "The decorators available are:\n- staticmethod\n\nThis information is based solely on the retrieved context from the Neo4j knowledge graph database.",
+        "score": ""
     },
     {
         "user_prompt": "What classes inherit from BasicFeature? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: 'BasicFeature'})-[:INHERITS_FROM]->(i:Class) RETURN i.name",
-        "final_answer": "The classes that inherit from BasicFeature are:\n\n- Feature\n\nThis information is derived from the retrieved context of the Cypher query result."
+        "final_answer": "The classes that inherit from BasicFeature are:\n\n- Feature\n\nThis information is derived from the retrieved context of the Cypher query result.",
+        "score": ""
     },
     {
         "user_prompt": "What classes use the method applyConfiguration and what does it do?\n",
         "cypher_query": "\n\nMATCH (c:Class)-[:HAS]->(f:Function {name: \"applyConfiguration\"}) RETURN c.name, f.comment",
-        "final_answer": "Based on the retrieved context, the class `DefaultPharmacophoreGenerator` uses the method `applyConfiguration`, and its comment is empty, indicating no additional documentation provided for this function. Therefore:\n\n- The class that uses the method `applyConfiguration` is `DefaultPharmacophoreGenerator`.\n- The comment for the `applyConfiguration` method is not available or is empty. \n\nSo, `applyConfiguration` is used by the class `DefaultPharmacophoreGenerator`, but there is no specific description of what it does."
+        "final_answer": "Based on the retrieved context, the class `DefaultPharmacophoreGenerator` uses the method `applyConfiguration`, and its comment is empty, indicating no additional documentation provided for this function. Therefore:\n\n- The class that uses the method `applyConfiguration` is `DefaultPharmacophoreGenerator`.\n- The comment for the `applyConfiguration` method is not available or is empty. \n\nSo, `applyConfiguration` is used by the class `DefaultPharmacophoreGenerator`, but there is no specific description of what it does.",
+        "score": ""
     },
     {
         "user_prompt": "How many parameters does norm1 take? \n",
         "cypher_query": "\n\nMATCH (f:Function {name: \"norm1\"})-[:HAS]->(p:Parameter) RETURN COUNT(p)",
-        "final_answer": "A: The function norm1 takes 8 parameters."
+        "final_answer": "A: The function norm1 takes 8 parameters.",
+        "score": ""
     },
     {
         "user_prompt": "Is getObjectID a staticmethod? \n",
         "cypher_query": "None",
-        "final_answer": "Based on the retrieved context, I cannot determine if getObjectID is a staticmethod as the required information was not found in the provided data. The context indicates that no data was retrieved, so there is no information available about the method getObjectID or its type. \n\nA: No information available about the method getObjectID or its type. The context provided does not contain details about this method."
+        "final_answer": "Based on the retrieved context, I cannot determine if getObjectID is a staticmethod as the required information was not found in the provided data. The context indicates that no data was retrieved, so there is no information available about the method getObjectID or its type. \n\nA: No information available about the method getObjectID or its type. The context provided does not contain details about this method.",
+        "score": ""
     },
     {
         "user_prompt": "Can the method __add__ of the class ConstLMatrixTranspose take an integer for the parameter e?\n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"ConstLMatrixTranspose\"})-[:HAS]->(f:Function {name: \"add\"})-[:HAS]->(p:Parameter {name: \"e\"})-[:OF_TYPE]->(t:Class {name: \"integer\"}) RETURN f.name, f.comment, p.name, p.default, p.type",
-        "final_answer": "Based on the retrieved context, the method `add` of the class `ConstLMatrixTranspose` does not have a parameter named `e` or specify a default value or type for such a parameter. Therefore, we cannot confirm whether the method `__add__` can take an integer for a parameter named `e`. The provided context only includes information about a method named `add` with a parameter `e` of type `integer`, but it does not relate to a `__add__` method. \n\nIf you need information about the `__add__` method specifically, please provide a relevant Cypher query for that method. \n\nGiven the current context, there is no indication that the `__add__` method exists or can accept an integer for a parameter named `e`. \n\nIf you have additional context or a different query result, please share it so I can provide a more accurate answer. \n\nBased on the given context, the answer is that we do not have sufficient information to determine if the `__add__` method can take an integer for a parameter named `e`."
+        "final_answer": "Based on the retrieved context, the method `add` of the class `ConstLMatrixTranspose` does not have a parameter named `e` or specify a default value or type for such a parameter. Therefore, we cannot confirm whether the method `__add__` can take an integer for a parameter named `e`. The provided context only includes information about a method named `add` with a parameter `e` of type `integer`, but it does not relate to a `__add__` method. \n\nIf you need information about the `__add__` method specifically, please provide a relevant Cypher query for that method. \n\nGiven the current context, there is no indication that the `__add__` method exists or can accept an integer for a parameter named `e`. \n\nIf you have additional context or a different query result, please share it so I can provide a more accurate answer. \n\nBased on the given context, the answer is that we do not have sufficient information to determine if the `__add__` method can take an integer for a parameter named `e`.",
+        "score": ""
     },
     {
         "user_prompt": "How does the method assign of the class MassComposition work? \n",
         "cypher_query": "\n\nMATCH (c:Class {name: \"MassComposition\"})-[:HAS]->(f:Function {name: \"assign\"}) RETURN f.comment",
-        "final_answer": "The method `assign` of the class `MassComposition` works as follows:\n- It replaces the current state of the `self` instance with a copy of the state of the `%MassComposition instance `map`. This means that the properties or values of the `self` instance are updated to match those of another `%MassComposition` instance that is specified in the `map`."
+        "final_answer": "The method `assign` of the class `MassComposition` works as follows:\n- It replaces the current state of the `self` instance with a copy of the state of the `%MassComposition instance `map`. This means that the properties or values of the `self` instance are updated to match those of another `%MassComposition` instance that is specified in the `map`.",
+        "score": ""
     },
     {
         "user_prompt": "How can I use the class ElementHistogram? ",
         "cypher_query": "None",
-        "final_answer": "Context could not be retrieved\n\nI'm unable to provide information about the class ElementHistogram as the necessary context could not be retrieved from the Neo4j knowledge graph database. Please ensure that there is relevant information available in the database for this class. If you have additional details or another query, feel free to share!"
+        "final_answer": "Context could not be retrieved\n\nI'm unable to provide information about the class ElementHistogram as the necessary context could not be retrieved from the Neo4j knowledge graph database. Please ensure that there is relevant information available in the database for this class. If you have additional details or another query, feel free to share!",
+        "score": ""
     }
 ]
