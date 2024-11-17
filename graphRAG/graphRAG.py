@@ -124,6 +124,7 @@ def get_pipeline_from_model(model):
         torch_dtype=torch.float16,
         device_map="auto",
         trust_remote_code=True,
+        offload_buffers=True
     )
 
 def get_cypher_query(user_prompt, pipe, schema):
@@ -192,10 +193,18 @@ def benchmark_rag(pipe_cypher, pipe_answer):
     for question in questions:
         cypher_query, final_answer = question_rag(question, pipe_cypher, pipe_answer)
         benchmark.append({"user_prompt": question, "cypher_query": cypher_query, 
-                          "final_answer": final_answer})
+                          "final_answer": final_answer, "score": ""})
 
     with open("/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_results.json", "w") as file:
         json.dump(benchmark, file, indent=4)
+
+
+def get_pipelines(model_cypher, model_answer):
+    pipe_cypher = get_pipeline_from_model(model_cypher)
+
+    pipe_answer = get_pipeline_from_model(model_answer)
+
+    return pipe_cypher, pipe_answer  
 
 
 if __name__ == "__main__":
