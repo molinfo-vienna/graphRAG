@@ -6,7 +6,6 @@ from huggingface_hub import hf_hub_download
 from neo4j import GraphDatabase
 from transformers import AutoTokenizer, pipeline
 import torch
-import pandas as pd
 import json
 
 # Base idea from this article: 
@@ -31,9 +30,11 @@ def generate_answer_qwen(user_prompt, system_prompt, pipe, **kwargs):
     # Generate the output using the pipeline
     output = pipe(full_prompt,
                   do_sample=True,
-                  top_k=10,
-                  top_p=0.95,
-                  **kwargs)
+                  top_k=5,
+                  top_p=0.9, 
+                  temperature = 0.7, 
+                  **kwargs
+                  )
     
     # Extract the relevant part of the generated text
     output = output[0]["generated_text"]
@@ -116,17 +117,16 @@ def initialize_neo4j():
 def get_pipeline_from_model(model):
     tokenizer = AutoTokenizer.from_pretrained(model,
                                             padding_side = "left")
-
+   
     return pipeline(
         "text-generation",
         model=model,
         tokenizer=tokenizer,
         torch_dtype=torch.float16,
-        device_map="auto",
-        trust_remote_code=True,
-        offload_buffers=True
+        trust_remote_code=True, 
+        device_map="auto"
     )
-
+    
 def get_cypher_query(user_prompt, pipe, schema):
     system_prompt_query= generate_cypher_query_prompt(schema)
 
@@ -172,7 +172,8 @@ def question_rag(user_prompt, pipe_cypher, pipe_answer):
 
     try: 
         query_result, cypher_query = retrieve_context(driver, user_prompt, pipe_cypher, schema)
-    except: 
+    except Exception as e: 
+        print("Exception while retrieving context: ", e)
         query_result = "Context could not be retrieved"
         cypher_query = "None"
         
@@ -211,10 +212,14 @@ if __name__ == "__main__":
     model_cypher = "codellama/CodeLlama-13b-Instruct-hf"
 
     model_answer = "Qwen/Qwen2.5-7B-Instruct"
-    
-    pipe_cypher = get_pipeline_from_model(model_cypher)
 
+    pipe_cypher = get_pipeline_from_model(model_cypher)
+    
     pipe_answer = get_pipeline_from_model(model_answer)
 
-    benchmark_rag(pipe_cypher, pipe_answer)
+    cypher_query , answer = question_rag("How can I initialize the class AromaticSubstructure?", pipe_cypher, pipe_answer)
+    
+    print("Cypher: ", cypher_query)
+    print("Final Answer: ", answer)
+    # # print(pipe_answer)
 
