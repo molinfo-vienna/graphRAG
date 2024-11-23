@@ -5,16 +5,22 @@ import dash_bootstrap_components as dbc
 app = Dash(__name__, external_stylesheets=[dbc.themes.FLATLY], suppress_callback_exceptions=True)
 server = app.server
 
-# Sidebar navigation
-sidebar = dbc.Nav(
-    [
-        dbc.NavLink("Chat", href="#", id="chat-link", active=False, style={"color": "white", "fontWeight": "bold"}),
-        dbc.NavLink("Documentation", href="#", id="docs-link", active=False, style={"color": "white", "fontWeight": "bold"}),
+# Navbar
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Chat", href="/", id="chat-link", active=True, style={"fontWeight": "bold"})),
+        dbc.NavItem(dbc.NavLink("About", href="/about", id="about-link", active=False, style={"fontWeight": "bold"})),
     ],
-    vertical=True,
-    pills=True,
-    className="bg-primary text-white",
-    style={"height": "100vh", "padding": "1rem"}
+    brand=html.Div(
+        [
+            html.Span("CDPKit GraphRAG", className="navbar-brand mb-0 h1"),
+        ],
+        style={"display": "flex", "alignItems": "center"}
+    ),
+    brand_href="/",
+    color="primary",
+    dark=True,
+    fluid=True
 )
 
 # Chat layout
@@ -26,22 +32,23 @@ chat_layout = html.Div([
                     html.Img(
                         src="https://cdpkit.org/_static/logo.svg",  # Replace with your image URL
                         alt="CDPKit Icon",
-                        style={"width": "250px", "height": "125px", "marginRight": "30px", "marginBottom": "10px",
-                               "marginTop": "10px"}  # Image size and margin
+                        style={"width": "175px", "height": "85px", "marginRight": "30px", "marginBottom": "15px",
+                                "marginTop": "15px"}  # Image size and margin
                     ),
-                    html.H1("GraphRAG Chat", className="d-inline align-middle", style={"marginBottom": "10px",
-                                                                                       "marginTop": "10px",
-                                                                                       "marginRight": "30px"})  # Title next to image
+                    html.H1("GraphRAG Chat", className="d-inline align-middle", style={"marginBottom": "15px",
+                                                                                       "marginRight": "30px", 
+                                                                                       "marginTop": "15px", 
+                                                                                       "fontSize": "2rem"})  # Title next to image
                 ],
                 style={"display": "flex", "alignItems": "center"}  # Flexbox to align horizontally
-            ), 
-            style={"display": "flex", "justifyContent": "center", "height": "auto"} 
+            ),
+            style={"display": "flex", "justifyContent": "center", "height": "100px"}
         )
     ),
 
     # Chat history
     dbc.Row(dbc.Col(html.Div(id="chat-history", className="p-3 border rounded bg-light",
-                             style={"height": "350px", "overflowY": "scroll"}))),
+                             style={"height": "300px", "overflowY": "scroll"}))),
 
     # Input, send button, and clear button
     dbc.Row([
@@ -65,51 +72,47 @@ chat_layout = html.Div([
                                color="primary", className="m-1", n_clicks=0)),
         ])
     ], style={"marginBottom": "20px"}),
-], style={"height": "100vh", "display": "flex", "flexDirection": "column"})
+], style={"height": "100vh", "display": "flex", "flexDirection": "column", "padding": "5px"})
 
 # Documentation layout
 docs_layout = html.Div([
-    html.H2("Documentation Section", className="text-center my-5"),
-    html.P("Here you can include links or explanations about CDPKit, usage examples, and more.", 
-           className="lead"),
+    html.H2("About the CDPKit GraphRAG", className="text-center my-5", style={"fontSize": "2rem"}),
+    html.P("Here you can include links or explanations about CDPKit, usage examples, and more.",
+           className="lead", style={"marginTop": "20px"}),
     html.Ul([
-        html.Li(html.A("CDPKit GitHub Repository", href="https://github.com/example", target="_blank")),
+        html.Li(html.A("CDPKit Documentation", href="https://cdpkit.org/", target="_blank")),
         html.Li(html.A("CDPKit API Documentation", href="https://docs.example.com", target="_blank")),
     ]),
 ])
 
-# Main layout with sidebar and default content set to the chat layout
+# Main layout
 app.layout = html.Div([
-    dbc.Row([
-        # Sidebar with fixed width for large screens, collapses on small screens
-        dbc.Col(sidebar, width=2, lg=2, style={"transition": "width 0.3s ease"}),
-        dbc.Col(html.Div(id="main-content", children=chat_layout), width=10, lg=10),
-    ], style={"display": "flex", "flexDirection": "row", "width": "100%", "height": "100vh"}),
-], style={"height": "100vh", "width": "100%", "display": "flex", "flexDirection": "row"})
+    dcc.Location(id="url", refresh=False),  # Tracks the current URL
+    navbar,  # Navbar at the top
+    html.Div(id="page-content")  # Placeholder for dynamic content
+])
 
-
-# Callback to update the main content and manage active state for sidebar tabs
+# Callback to render content based on URL
 @app.callback(
-    [Output("main-content", "children"),
-     Output("chat-link", "active"),
-     Output("docs-link", "active")],
-    [Input("chat-link", "n_clicks"), Input("docs-link", "n_clicks")],
-    prevent_initial_call=True
+    Output("page-content", "children"),
+    Input("url", "pathname")
 )
-def render_content(chat_clicks, docs_clicks):
-    ctx = callback_context
-    if not ctx.triggered:
-        # Default to Chat page
-        return chat_layout, True, False
+def display_page(pathname):
+    if pathname == "/about":
+        return docs_layout
+    # Default to Chat layout
+    return chat_layout
 
-    triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+# Callback to manage active navbar links
+@app.callback(
+    [Output("chat-link", "active"),
+     Output("about-link", "active")],
+    Input("url", "pathname")
+)
 
-    if triggered_id == "chat-link":
-        return chat_layout, True, False
-    elif triggered_id == "docs-link":
-        return docs_layout, False, True
+def update_active_links(pathname):
+    return pathname == "/", pathname == "/about"
 
-    return html.Div("404: Page not found"), False, False  # Fallback for unexpected navigation
 
 # Chat interactions callback
 @app.callback(
@@ -130,10 +133,8 @@ def handle_chat_interactions(send_clicks, clear_clicks, ex1_clicks, ex2_clicks, 
     if not ctx.triggered:
         return chat_history, ""
 
-    # Determine which button or input triggered the callback
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-    # Initialize chat history if it's None
     if chat_history is None:
         chat_history = []
 
@@ -144,13 +145,12 @@ def handle_chat_interactions(send_clicks, clear_clicks, ex1_clicks, ex2_clicks, 
                 html.Div(f"{query}", className="text-end text-primary fw-bold mb-2"),
                 html.Div(f"{response}", className="text-start text-primary fw-normal mb-3"),
             ])
-            return chat_history + [new_message], ""  # Reset input field after sending the message
+            return chat_history + [new_message], ""
 
     elif triggered_id == "clear-button":
-        return [], ""  # Clear chat history and input field
+        return [], ""
 
     elif triggered_id in ["example-1", "example-2", "example-3"]:
-        # Example queries
         example_queries = {
             "example-1": "What methods does the class AtomBondMapping have?",
             "example-2": "What type is parameter feature of function perceiveExtendedType?",
@@ -162,9 +162,9 @@ def handle_chat_interactions(send_clicks, clear_clicks, ex1_clicks, ex2_clicks, 
             html.Div(f"{query}", className="text-end text-primary fw-bold mb-2"),
             html.Div(f"{response}", className="text-start text-primary fw-normal mb-3"),
         ])
-        return chat_history + [new_message], query  # Show example query in the input field
+        return chat_history + [new_message], query
 
-    return chat_history, ""  # Default: return current state
+    return chat_history, ""
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
