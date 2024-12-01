@@ -7,6 +7,7 @@ from neo4j import GraphDatabase
 from transformers import AutoTokenizer, pipeline
 import torch
 import json
+import re 
 
 # Base idea from this article: 
 # https://medium.com/@silviaonofrei/code-llamas-knowledge-of-neo4j-s-cypher-query-language-54783d2ad421
@@ -32,7 +33,7 @@ def generate_answer_qwen(user_prompt, system_prompt, pipe, **kwargs):
                   do_sample=True,
                   top_k=5,
                   top_p=0.9, 
-                  temperature = 0.7, 
+                  temperature = 0.6, 
                   **kwargs
                   )
     
@@ -48,7 +49,7 @@ def generate_answer_code_llama(user_prompt, system_prompt, pipe, **kwargs):
     if "max_new_tokens" not in kwargs:
         kwargs["max_new_tokens"] = 512
     
-    kwargs.setdefault("temperature", 0.7)
+    kwargs.setdefault("temperature", 0.6)
 
     output = pipe(full_prompt,
                       do_sample=True,
@@ -72,7 +73,8 @@ def schema_text(node_props, rels):
 
 def generate_cypher_query_prompt(schema):
     return """
-    You are experienced with cypher queries. Provide answers in Cypher query language, *strictly* based on the following graph Neo4j schema. Respect the possible direction of relationships and the possible naming of nodes, properties and relationships. Only answer with the query and nothing else.
+    You are experienced with cypher queries. Provide answers in Cypher query language, *strictly* based on the following graph Neo4j schema. Respect the possible direction of relationships and the possible naming of nodes, properties and relationships. 
+    Only answer with the query and nothing else.
 
     ### The Schema
 
@@ -92,6 +94,9 @@ def generate_rag_prompt(retrieved_context, cypher_query):
     You are a highly intelligent assistant. Your job is to answer user questions using *only* the information from the retrieved context provided from a Neo4j knowledge graph database. 
     The retrieved context is the result of a cypher query.
     Ensure that your response strictly relies on the retrieved context, and do not add any information from other sources.
+    If the user query explicitly asks "how to do" or "how to use" something, or mentions the need for an example, provide one brief Python code example to illustrate your response. The example should directly address the user's query and not include unnecessary details.
+    However, if the user query does not ask for an example or does not pertain to "how to do" or "how to use" something, avoid including any Python examples in your answer.
+    Always ensure that your response is aligned with the context and the user’s intent.
 
     Cypher query: 
     {cypher_query}
@@ -103,8 +108,8 @@ def generate_rag_prompt(retrieved_context, cypher_query):
     Cypher query: MATCH (c:Class {{name: 'AromaticSubstructure'}})-[:HAS]->(f:Function) RETURN f.name, f.comment
     [['f.name', 'f.comment'], ['__init__', 'Constructs an empty <tt>AromaticSubstructure</tt> instance.'], ['__init__', 'Construct a <tt>AromaticSubstructure</tt> instance that consists of the aromatic atoms and bonds of the molecular graph <em>molgraph</em>.'], ['perceive', 'Replaces the currently stored atoms and bonds by the set of aromatic atoms and bonds of the molecular graph <em>molgraph</em>.']]
     A: AromaticSubstructure has the following methods:
-    - __init__: Constructs an empty <tt>AromaticSubstructure</tt> instance.
-    - __init__: Construct a <tt>AromaticSubstructure</tt> instance that consists of the aromatic atoms and bonds of the molecular graph <em>molgraph</em>.
+    - __init__: Constructs an empty AromaticSubstructure instance.
+    - __init__: Construct a AromaticSubstructure instance that consists of the aromatic atoms and bonds of the molecular graph <em>molgraph</em>.
     - perceive: Replaces the currently stored atoms and bonds by the set of aromatic atoms and bonds of the molecular graph <em>molgraph</em>.
     """.format(retrieved_context = retrieved_context, cypher_query = cypher_query) 
            
@@ -188,16 +193,32 @@ def question_rag(user_prompt, pipe_cypher, pipe_answer):
 
 def benchmark_rag(pipe_cypher, pipe_answer):
     with open("/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_questions.txt", "r") as f: 
-        questions = f.readlines()
-    
-    benchmark = []
-    for question in questions:
-        cypher_query, final_answer = question_rag(question, pipe_cypher, pipe_answer)
-        benchmark.append({"user_prompt": question, "cypher_query": cypher_query, 
-                          "final_answer": final_answer, "score": ""})
+        testset = f.read()
 
-    with open("/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_results.json", "w") as file:
-        json.dump(benchmark, file, indent=4)
+    pattern = r"Q:\s*(.+?)\nQuery:\s*(.+?)\nA:\s*(.+?)(?=\nQ:|\Z)"
+
+    # Find all matches
+    matches = re.findall(pattern, testset, re.DOTALL)
+
+    # Parse into a list of dictionaries
+    parsed_questions = [
+        {"Question": match[0].strip(), "Query": match[1].strip(), "Answer": match[2].strip()}
+        for match in matches
+    ]
+
+    for i in range(20, 50): 
+        benchmark = []
+        for question in parsed_questions:
+            cypher_query, final_answer = question_rag(question["Question"], pipe_cypher, pipe_answer)
+            benchmark.append({"user_prompt": question["Question"], "cypher_query": cypher_query, 
+                            "final_answer": final_answer, "score_cypher_automated": "", 
+                            "score_answer_automated": "", "score_cypher_manual": "", 
+                            "score_answer_manual": "",
+                            "score_python_example:":"", 
+                            "model_cypher": question["Query"], "model_answer": question["Answer"] })
+
+        with open(f"/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_results/benchmark_results_{i+1}.json", "w") as file:
+            json.dump(benchmark, file, indent=4)
 
 
 def get_pipelines(model_cypher, model_answer):
@@ -217,9 +238,11 @@ if __name__ == "__main__":
     
     pipe_answer = get_pipeline_from_model(model_answer)
 
-    cypher_query , answer = question_rag("How can I initialize the class AromaticSubstructure?", pipe_cypher, pipe_answer)
+    benchmark_rag(pipe_cypher=pipe_cypher, pipe_answer=pipe_answer)
+
+    # cypher_query , answer = question_rag("What methods does the class AtomBondMapping have?", pipe_cypher, pipe_answer)
     
-    print("Cypher: ", cypher_query)
-    print("Final Answer: ", answer)
+    # print("Cypher: ", cypher_query)
+    # print("Final Answer: ", answer)
     # # print(pipe_answer)
 

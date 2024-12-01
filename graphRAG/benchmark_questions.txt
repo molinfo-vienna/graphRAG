@@ -1,30 +1,102 @@
-What are the folders included in the CDPKit Project? 
-What files are included in the folder Base?
-What class does the class AromaticRingSet inherit from? 
-What methods does the class AtomBondMapping have? 
-What parameters does calcGeometricalDiameter take? 
-What is the method calculate of the class MolecularComplexityCalculator good for? 
-Does the parameter atom of the function hasUFFType have a default value? 
-What does the function getMMFF94TypeIndex return? 
-What can you tell me about the class InteractionType? 
-What attributes does DataFormat have? 
-Whats the meaning of the attribute R of class AtomConfiguration?
-What type is parameter feature of function perceiveExtendedType?
-What does the parameter feature of function hasHydrophobicity stand for? 
-In what functions does the parameter feature appear? 
-What functions are in the file Feature_Functions.doc.py? 
-What type does getFeatures return?  
-How many parameters does norm1 take? 
-Can the method __add__ of the class ConstLMatrixTranspose take an integer for the parameter e?
-How does the method assign of the class MassComposition work? 
-How can I use the class ElementHistogram? 
-How can I initialize the class AromaticSubstructure?
-What can I do with the class BemisMurckoAnalyzer?
-How can I assign a BemisMurckoAnalyzer?
-How to read in molecules?
-How to read in SDF Molecules/Files?
-How to read in SMILES?
-How to generate Conformations?
-Can you generate Confromations witht the CDPKit? If yes, how?
-How to iterate over Atoms of a Molecule?
-How can I use the CDPKit to iterate over Atoms?
+Q: What are the folders included in the CDPKit Project?
+Query: \n\nMATCH (f:Folder)-[:INCLUDED_IN]->(p:Project {name: 'CDPKit'}) RETURN f.name 
+A: The folders included in the CDPKit Project are:\n- Chem\n- Pharm\n- Base\n- Biomol\n- ConfGen\n- Descr\n- ForceField\n- GRAIL\n- Grid\n- Math\n- MolProp\n- Shape\n- Util\n- Vi
+Q: What files are included in the folder Base?
+Query: \n\nMATCH (f:File)-[:INCLUDED_IN]->(folder:Folder {name: 'Base'}) RETURN f.name
+A: The files included in the folder Base are:\n- Package.doc.py\n- Variables.doc.py\n- DataFormat.doc.py\n- ValueError.doc.py\n- VoidLookupKeyAnyFunctor.doc.py\n- PropertyContainer.doc.py\n- ControlParameterContainer.doc.py\n- FileIOStream.doc.py\n- VoidDataIOBaseFunctor.doc.py\n- CalculationFailed.doc.py\n- Exception.doc.py\n- OStream.doc.py\n- DataIOBase.doc.py\n- OperationFailed.doc.py\n- IndexError.doc.py\n- ItemNotFound.doc.py\n- BadCast.doc.py\n- NullPointerException.doc.py\n- IStream.doc.py\n- Any.doc.py\n- SizeError.doc.py\n- VoidLookupKeyFunctor.doc.py\n- LookupKey.doc.py\n- StringIOStream.doc.py\n- RangeError.doc.py\n- IOError.doc.py\n- ControlParameterList.doc.py\n- IOStream.doc.py\n- VoidFunctor.doc.py
+Q: What class does the class AromaticRingSet inherit from? 
+Query:\n\nMATCH (c:Class {name: \"AromaticRingSet\"})-[:INHERITS_FROM]->(p:Class) RETURN p.name
+A: The class AromaticRingSet inherits from FragmentList.
+Q: What methods does the class AtomBondMapping have? 
+Query: \n\nMATCH (c:Class {name: \"AtomBondMapping\"})-[:HAS]->(f:Function) RETURN f.name, f.comment
+A: The class AtomBondMapping has the following methods:\n- __init__: Initializes the \\e AtomBondMapping instance.\n- __init__: Initializes a copy of the \\e AtomBondMapping instance \\a mapping.\n- getObjectID: Returns the numeric identifier (ID) of the wrapped C++ class instance. Different Python AtomBondMapping instances may reference the same underlying C++ class instance. The commonly used Python expression `a is not b` thus cannot tell reliably whether the two AtomBondMapping instances \\e a and \\e b reference different C++ objects. The numeric identifier returned by this method allows to correctly implement such an identity test via the simple expression `a.getObjectID()!= b.getObjectID()`.\n- assign: Replaces the current state of \\a self with a copy of the state of the \\e AtomBondMapping instance \\a mapping.\n- getAtomMapping: Returns a reference to the Chem.AtomMapping data member storing the atom to atom mappings.\n- getBondMapping: Returns a reference to the Chem.BondMapping data member storing the bond to bond mappings.\n- clear: Removes all atom to atom and bond to bond mappings.\n- __eq__: Equality comparison operator.\n- __ne__: Inequality comparison operator. The result is equivalent to `!(self == mapping)`.
+Q: What parameters does calcGeometricalDiameter take? 
+Query:\n\nMATCH (f:Function {name: \"calcGeometricalDiameter\"})-[:HAS]->(p:Parameter) RETURN p.name, p.type, p.comment
+A: The function `calcGeometricalDiameter` takes the following parameters:\n\n- `cntnr`: of type `Chem.Entity3DContainer` or `Chem.AtomContainer`\n- `coords_func`: of type `Chem.Atom3DCoordinatesFunction`.
+Q: What is the method calculate of the class MolecularComplexityCalculator good for? 
+Query: \n\nMATCH (c:Class {name: \"MolecularComplexityCalculator\"})-[:HAS]->(f:Function {name: \"calculate\"}) RETURN f.comment
+A: The method `calculate` of the class `MolecularComplexityCalculator` is good for calculating the complexity of the molecular graph `molgraph`.
+Q: Does the parameter atom of the function hasUFFType have a default value? 
+Query: \n\nMATCH (f:Function {name: 'hasUFFType'})-[:HAS]->(p:Parameter {name: 'atom'}) RETURN p.default
+A: No.
+Q: What does the function getMMFF94TypeIndex return? 
+Query: \n\nMATCH (f:Function {name: \"getMMFF94TypeIndex\"}) RETURN f.returns
+A: The function getMMFF94TypeIndex returns an integer.
+Q: What can you tell me about the class InteractionType? 
+Query: \n\nMATCH (c:Class {name: \"InteractionType\"}) RETURN c.comment, c.attributes
+A: The class `InteractionType` provides flags for the specification of a set of force field interaction types. It includes the following attributes:\n\n- **NONE**: Value `0`\n- **BOND_STRETCHING**: Value `1`\n- **ANGLE_BENDING**: Value `2`\n- **STRETCH_BEND**: Value `4`\n- **OUT_OF_PLANE_BENDING**: Value `8`\n- **TORSION**: Value `16`\n- **VAN_DER_WAALS**: Value `32`\n- **ELECTROSTATIC**: Value `64`\n- **ALL**: Value `127`.
+Q: Whats the meaning of the attribute R of class AtomConfiguration?
+Query: \n\nMATCH (c:Class {name: \"AtomConfiguration\"}) RETURN c.attributes
+A: The attribute R specifies that the atom has <em>R</em> configuration.
+Q: What type is parameter feature of function perceiveExtendedType?
+Query: \n\nMATCH (f:Function {name: \"perceiveExtendedType\"})-[:HAS]->(p:Parameter) RETURN p.type
+A: The parameter feature of the function perceiveExtendedType has the type \"Pharm.Feature\".
+Q: What does the parameter feature of function hasHydrophobicity stand for? 
+Query: \n\nMATCH (f:Function {name: \"hasHydrophobicity\"})-[:HAS]->(p:Parameter {name: \"feature\"}) RETURN p.comment
+A: I cannot tell what it stands for. 
+Q: In what functions does the parameter feature appear? 
+Query: \n\nMATCH (p:Parameter {name: \"feature\"})<-[:HAS]-(f:Function) RETURN f.name, f.comment
+A: The parameter feature appears in the following functions:- clearTolerance - hasTolerance - getTolerance - setTolerance - clearType - hasType - getType - setType - clearSubstructure - hasSubstructure - getSubstructure - setSubstructure - clearDisabledFlag - hasDisabledFlag - getDisabledFlag - setDisabledFlag - clearOptionalFlag - hasOptionalFlag - getOptionalFlag - setOptionalFlag - clearLength - hasLength - getLength - setLength - clearOrientation - hasOrientation - getOrientation - setOrientation - clearWeight - hasWeight - getWeight - setWeight - clearGeometry - hasGeometry - getGeometry - setGeometry - clearHydrophobicity - hasHydrophobicity - getHydrophobicity - setHydrophobicity - perceiveExtendedType
+Q: What functions are in the file Feature_Functions.doc.py? 
+Query: \n\nMATCH (f: Function)-[:`DECLARED_AT`]->(fi: File {name: \"Feature_Functions.doc.py\"}) RETURN f.name
+A: The functions - clearTolerance - hasTolerance - getTolerance - setTolerance - clearType - hasType - getType - setType - clearSubstructure - hasSubstructure - getSubstructure - setSubstructure - clearDisabledFlag - hasDisabledFlag - getDisabledFlag - setDisabledFlag - clearOptionalFlag - hasOptionalFlag - getOptionalFlag - setOptionalFlag - clearLength - hasLength - getLength - setLength - clearOrientation - hasOrientation - getOrientation - setOrientation - clearWeight - hasWeight - getWeight - setWeight - clearGeometry - hasGeometry - getGeometry - setGeometry - clearHydrophobicity - hasHydrophobicity - getHydrophobicity - setHydrophobicity - perceiveExtendedType
+Q: What type does getFeatures return?  
+Query: \n\nMATCH (f: Function {name: "getFeatures"}) RETURN f.returns
+A: It returns None
+Q: How many parameters does norm1 take? 
+Query: \n\nMATCH (f:Function {name: \"norm1\"})-[:HAS]->(p:Parameter) RETURN COUNT(p)
+A: The function norm1 has 8 parameters.
+Q: Can the method __add__ of the class ConstLMatrixTranspose take an integer for the parameter e?
+Query: \n\nMATCH (c:Class {name: \"ConstLMatrixTranspose\"})-[:HAS]->(f:Function {name: \"__add__\"})-[:HAS]->(p:Parameter {name: \"e\"}) RETURN p.type;
+A: No, the parameter e is of type ConstLMatrixTranspose.
+Q: How does the method assign of the class MassComposition work? 
+Query: \n\nMATCH (c:Class {name: \"MassComposition\"})-[:HAS]->(f:Function {name: \"assign\"}) RETURN f.comment
+A: The method `assign` of the class `MassComposition` works as follows:\n- It replaces the current state of the `self` instance with a copy of the state of the `%MassComposition instance `map`. This means that the properties or values of the `self` instance are updated to match those of another `%MassComposition` instance that is specified in the `map`.
+Q: How can I use the class ElementHistogram? 
+Query: \n\nMATCH (c: Class {name: \"ElementHistogram\"})-[:HAS]->(f:Function) RETURN f.name, f.comment; 
+Answer: To use ElementHistogram, you can utilize the following methods: - **__init__**: Creates an empty map. - **__init__**: Initializes a copy of the `ElementHistogram` instance `hist`. - **getSize**: Returns the size (number of entries) of the map. - **clear**: Erases all entries. - **isEmpty**: Tells whether the map is empty (`getSize() == 0`). - **getValue**: Returns a reference to the value associated with the specified key. If the map contains the specified entry, a reference to the associated value is returned. If the map does not contain the entry and default values are enabled, a reference to a default constructed value object is returned. Otherwise, `Base.ItemNotFound` is thrown. - **getValue**: Returns a reference to the value associated with the specified key, or the value given by the second argument if the specified entry does not exist. If the map contains an entry with the specified key, a reference to the associated value is returned. If the map does not contain the entry, the second argument `def_value` is returned. - **removeEntry**: Removes the entry specified by `key` from the map. - **setEntry**: Inserts a new entry or updates the value of an existing entry with the specified key and value. If the map does not already contain an entry whose key is the same as `key`, a new entry will be created. Otherwise, the value of the existing entry is updated with `value`. The return value is a dereferenceable iterator that points to the newly inserted or updated entry whose key is equivalent to the specified key. - **containsEntry**: Tells whether the map contains an entry with the specified key. - **insertEntry**: Tries to insert a new entry with specified key and value into the map. Inserts a new entry if and only if the map does not already contain an entry whose key is the same as the specified key. The return value is a pair `P`. `P.first` is an iterator pointing to the entry whose key is the same as the specified key. `P.second` is a boolean value which is `True` if `item` was actually inserted, and `False` if the map already contained an entry with the specified key. - **__getitem__** - **__setitem__** - **__delitem__** - **__contains__**: Returns the result of the membership test operation `key in self`. - **getObjectID**: Returns the numeric identifier (ID)
+Q: How can I initialize the class AromaticSubstructure?
+Query: \n\nMATCH (c:Class {name: \"AromaticSubstructure\"})-[:HAS]->(f: Function) RETURN f.name, f.comment; 
+A:To initialize the class AromaticSubstructure, you can use either of the following methods: - __init__: Constructs an empty AromaticSubstructure instance. - __init__: Construct a AromaticSubstructure instance that consists of the aromatic atoms and bonds of the molecular graph `molgraph`. 
+Q: How can I assign a BemisMurckoAnalyzer?
+Query: \n\nMATCH (c:Class {name: \"BemisMurckoAnalyzer\"})-[:HAS]->(f: Function) RETURN f.name, f.comment;
+A: To assign a BemisMurckoAnalyzer, you can use the `assign` method. This method replaces the current state of `self` with a copy of the state of the BemisMurckoAnalyzer instance `gen`. No other methods directly named for assignment are listed in the retrieved context. For more detailed usage, you might need additional information or documentation specific to the BemisMurckoAnalyzer class. However, based on the available context, the relevant method is `assign`. Example usage might look something like this: ```python bma = BemisMurckoAnalyzer()  # Initialize BemisMurckoAnalyzer # Assuming gen is another BemisMurckoAnalyzer instance bma.assign(gen) ```  Please note that the exact syntax and parameters may vary depending on the implementation details not provided in the context.
+Q: How to read in molecules?
+Query: \n\nMATCH (c: Class {name: \"MoleculeReader\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To read in molecules, you can use the MoleculeReader class. It provides the following methods: - `getDataFormat`: This method is not described with additional comments. - `__init__`: Initializes the MoleculeReader instance. This method is listed multiple times, indicating it might be a constructor or a method that can be called multiple times to initialize the instance.
+Q: How to read in SDF Molecules?
+Query: \n\nMATCH (c: Class {name: \"SDFMoleculeReader\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To read in SDF molecules, you can use the SDFMoleculeReader class.
+Q: How to read in SMILES?
+Query: \n\nMATCH (c: Class {name: \"SMILESMoleculeReader\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To read in SMILES, you can use the SMILESMolecileReader. It has to be initialized with an input stream that the molecule is read from. 
+Q: How to generate Conformations?
+Query: \n\nMATCH (c: Class {name: \"ConformerGenerator\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To generate conformations using ConformerGenerator, you can use the `generate` method. Here's how you can do it: - `generate`: Generates conformations. Additional methods related to ConformerGenerator include: - `setConformers`: Sets the conformers. - `getNumConformers`: Gets the number of generated conformers. - `getConformer`: Retrieves a specific conformation by index. - `__getitem__`: Allows indexing to retrieve conformations. - `__init__`: Initializes the ConformerGenerator instance. - `getObjectID`: Returns the numeric identifier of the wrapped C++ class instance. - `getSettings`: Gets the settings of the ConformerGenerator.  These methods can be used in conjunction with the `generate` method to manage and manipulate the generated conformations.
+Q: Can you generate Confromations witht the CDPKit? If yes, how?
+Query: \n\nMATCH (c: Class {name: \"ConformerGenerator\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To generate conformations using ConformerGenerator, you can use the `generate` method. Here's how you can do it: - `generate`: Generates conformations. Additional methods related to ConformerGenerator include: - `setConformers`: Sets the conformers. - `getNumConformers`: Gets the number of generated conformers. - `getConformer`: Retrieves a specific conformation by index. - `__getitem__`: Allows indexing to retrieve conformations. - `__init__`: Initializes the ConformerGenerator instance. - `getObjectID`: Returns the numeric identifier of the wrapped C++ class instance. - `getSettings`: Gets the settings of the ConformerGenerator.  These methods can be used in conjunction with the `generate` method to manage and manipulate the generated conformations.
+Q: How to iterate over Atoms of a Molecule?
+Query: \n\nMATCH (c: Class {name: \"Molecule\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: You can use the `getAtoms` method to get all atoms and then iterate over the returned collection. Here's how you might do it: ```python for atom in molecule.getAtoms(): # Do something with each atom``` This assumes that `molecule` is an instance of the Molecule class. The `getAtoms` method returns a collection of atoms, which you can then iterate over. Please refer to the specific implementation details for further customization.
+Q: How can I use the CDPKit to iterate over Atoms?
+Query: \n\nMATCH (c: Class {name: \"Molecule\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: You can use the `getAtoms` method to get all atoms and then iterate over the returned collection. Here's how you might do it: ```python for atom in molecule.getAtoms(): # Do something with each atom``` This assumes that `molecule` is an instance of the Molecule class. The `getAtoms` method returns a collection of atoms, which you can then iterate over. Please refer to the specific implementation details for further customization.
+Q: How can I assign an instance of the class BemisMurckoAnalyzer?
+Query: \n\nMATCH (c:Class {name: \"BemisMurckoAnalyzer\"})-[:HAS]->(f: Function) RETURN f.name, f.comment;
+A: To assign a BemisMurckoAnalyzer, you can use the `assign` method. This method replaces the current state of `self` with a copy of the state of the BemisMurckoAnalyzer instance `gen`. No other methods directly named for assignment are listed in the retrieved context. For more detailed usage, you might need additional information or documentation specific to the BemisMurckoAnalyzer class. However, based on the available context, the relevant method is `assign`. Example usage might look something like this: ```python bma = BemisMurckoAnalyzer()  # Initialize BemisMurckoAnalyzer # Assuming gen is another BemisMurckoAnalyzer instance bma.assign(gen) ```  Please note that the exact syntax and parameters may vary depending on the implementation details not provided in the context.
+Q: How to read in molecules with the class MoleculeReader?
+Query: \n\nMATCH (c: Class {name: \"MoleculeReader\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To read in molecules, you can use the MoleculeReader class. It provides the following methods: - `getDataFormat`: This method is not described with additional comments. - `__init__`: Initializes the MoleculeReader instance. This method is listed multiple times, indicating it might be a constructor or a method that can be called multiple times to initialize the instance.
+Q: How to read in SDF Molecules with the class SDFMoleculeReader?
+Query: \n\nMATCH (c: Class {name: \"SDFMoleculeReader\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To read in SDF molecules, you can use the SDFMoleculeReader class.
+Q: How to read in SMILES with the class SMILESMoleculeReader?
+Query: \n\nMATCH (c: Class {name: \"SMILESMoleculeReader\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To read in SMILES, you can use the SMILESMoleculeReader. It has to be initialized with an input stream that the molecule is read from. 
+Q: How to generate Conformations with the class ConformerGenerator?
+Query: \n\nMATCH (c: Class {name: \"ConformerGenerator\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: To generate conformations using ConformerGenerator, you can use the `generate` method. Here's how you can do it: - `generate`: Generates conformations. Additional methods related to ConformerGenerator include: - `setConformers`: Sets the conformers. - `getNumConformers`: Gets the number of generated conformers. - `getConformer`: Retrieves a specific conformation by index. - `__getitem__`: Allows indexing to retrieve conformations. - `__init__`: Initializes the ConformerGenerator instance. - `getObjectID`: Returns the numeric identifier of the wrapped C++ class instance. - `getSettings`: Gets the settings of the ConformerGenerator.  These methods can be used in conjunction with the `generate` method to manage and manipulate the generated conformations.
+Q: How to iterate over Atoms of the class Molecule?
+Query: \n\nMATCH (c: Class {name: \"Molecule\"})-[:HAS]->(f: Function) return c.name, c.comment, f.name, f.comment
+A: You can use the `getAtoms` method to get all atoms and then iterate over the returned collection. Here's how you might do it: ```python for atom in molecule.getAtoms(): # Do something with each atom``` This assumes that `molecule` is an instance of the Molecule class. The `getAtoms` method returns a collection of atoms, which you can then iterate over. Please refer to the specific implementation details for further customization.
