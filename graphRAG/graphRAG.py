@@ -206,7 +206,7 @@ def benchmark_rag(pipe_cypher, pipe_answer):
         for match in matches
     ]
 
-    for i in range(20, 50): 
+    for i in range(80, 100): 
         benchmark = []
         for question in parsed_questions:
             cypher_query, final_answer = question_rag(question["Question"], pipe_cypher, pipe_answer)
