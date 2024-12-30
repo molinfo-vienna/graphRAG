@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     benchmark_rag(pipe_cypher=pipe_cypher, pipe_answer=pipe_answer)
 
-    # cypher_query , answer = question_rag("What methods does the class AtomBondMapping have?", pipe_cypher, pipe_answer)
+    cypher_query , answer = question_rag("What methods does the class AtomBondMapping have?", pipe_cypher, pipe_answer)
    
     print("Cypher: ", cypher_query)
     print("Final Answer: ", answer)
