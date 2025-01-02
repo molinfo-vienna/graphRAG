@@ -30,35 +30,6 @@ def question_rag(user_prompt: str, pipe_cypher: TextGenerationPipeline, pipe_ans
 
     return cypher_query, final_answer
 
-def benchmark_rag(pipe_cypher: TextGenerationPipeline, pipe_answer: TextGenerationPipeline) -> None:
-    # function for running the benchmark questions 
-    with open("/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_questions.txt", "r") as f: 
-        testset = f.read()
-
-    pattern = r"Q:\s*(.+?)\nQuery:\s*(.+?)\nA:\s*(.+?)(?=\nQ:|\Z)"
-
-    # Find all matches
-    matches = re.findall(pattern, testset, re.DOTALL)
-
-    # Parse into a list of dictionaries
-    parsed_questions = [
-        {"Question": match[0].strip(), "Query": match[1].strip(), "Answer": match[2].strip()}
-        for match in matches
-    ]
-
-    for i in range(80, 100): 
-        benchmark = []
-        for question in parsed_questions:
-            cypher_query, final_answer = question_rag(question["Question"], pipe_cypher, pipe_answer)
-            benchmark.append({"user_prompt": question["Question"], "cypher_query": cypher_query, 
-                            "final_answer": final_answer, "score_cypher_automated": "", 
-                            "score_answer_automated": "", "score_cypher_manual": "", 
-                            "score_answer_manual": "",
-                            "score_python_example:":"", 
-                            "model_cypher": question["Query"], "model_answer": question["Answer"] })
-
-        with open(f"/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_results/benchmark_results_{i+1}.json", "w") as file:
-            json.dump(benchmark, file, indent=4)
 
 if __name__ == "__main__":
     model_cypher = "codellama/CodeLlama-13b-Instruct-hf"
@@ -69,7 +40,6 @@ if __name__ == "__main__":
     
     pipe_answer = get_pipeline_from_model(model_answer)
 
-    benchmark_rag(pipe_cypher=pipe_cypher, pipe_answer=pipe_answer)
 
     cypher_query , answer = question_rag("What methods does the class AtomBondMapping have?", pipe_cypher, pipe_answer)
    
