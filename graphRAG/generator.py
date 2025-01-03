@@ -24,7 +24,7 @@ def generate_rag_prompt(retrieved_context: str, cypher_query: str) -> str:
     # positive examples are added as well as clear instructions
     return """
 
-    You are a highly intelligent assistant. Your job is to answer user questions using *only* the information from the retrieved context provided from a Neo4j knowledge graph database. 
+    You are a highly intelligent assistant. Your job is to answer user questions using *only* the information from the retrieved context provided from a Neo4j knowledge graph database. If appropriate, add a small python example for the retrieved context, but no cypher queries. Only add this Python code if it is appropriate for the question.  
     The retrieved context is the result of a cypher query.
     Ensure that your response strictly relies on the retrieved context, and do not add any information from other sources.
 
@@ -36,7 +36,7 @@ def generate_rag_prompt(retrieved_context: str, cypher_query: str) -> str:
     ### Example 1: 
     Q: What methods does AromaticSubstructure have?
     Cypher query: MATCH (c:Class {{name: 'AromaticSubstructure'}})-[:HAS]->(f:Function) RETURN f.name, f.comment
-    [['f.name', 'f.comment'], ['__init__', 'Constructs an empty <tt>AromaticSubstructure</tt> instance.'], ['__init__', 'Construct a <tt>AromaticSubstructure</tt> instance that consists of the aromatic atoms and bonds of the molecular graph <em>molgraph</em>.'], ['perceive', 'Replaces the currently stored atoms and bonds by the set of aromatic atoms and bonds of the molecular graph <em>molgraph</em>.']]
+    Retrieved Context: [['f.name', 'f.comment'], ['__init__', 'Constructs an empty <tt>AromaticSubstructure</tt> instance.'], ['__init__', 'Construct a <tt>AromaticSubstructure</tt> instance that consists of the aromatic atoms and bonds of the molecular graph <em>molgraph</em>.'], ['perceive', 'Replaces the currently stored atoms and bonds by the set of aromatic atoms and bonds of the molecular graph <em>molgraph</em>.']]
     A: AromaticSubstructure has the following methods:
     - __init__: Constructs an empty <tt>AromaticSubstructure</tt> instance.
     - __init__: Construct a <tt>AromaticSubstructure</tt> instance that consists of the aromatic atoms and bonds of the molecular graph <em>molgraph</em>.

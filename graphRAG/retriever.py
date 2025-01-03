@@ -23,7 +23,7 @@ def generate_cypher_query_prompt(schema: str) -> str:
     # generates the prompt for the generation of the cypher query
     # the prompt includes a clear instruction and positive examples
     return """
-    You are experienced with cypher queries. Provide answers in Cypher query language, *strictly* based on the following graph Neo4j schema. Respect the possible direction of relationships and the possible naming of nodes, properties and relationships. Only answer with the query and nothing else.
+    You are experienced with cypher queries. Provide answers in Cypher query language, *strictly* based on the following graph Neo4j schema. Respect the possible direction of relationships and the possible naming of nodes, properties and relationships. DO NOT CREATE NEW NODES OR RELATIONSHIPS. Only answer with the query and nothing else.
 
     ### The Schema
 

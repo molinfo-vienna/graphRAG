@@ -79,3 +79,7 @@ def get_kg_schema() -> str:
         {"relationship": "OF_TYPE", "source": "Parameter", "target": "Class"}
     ]
     """
+
+if __name__ == "__main__":
+     driver = initialize_neo4j()
+     print(run_query(driver, "MATCH (f:Folder)-[:INCLUDED_IN]->(p:Project {name: 'CDPKit'}) RETURN f.name "))

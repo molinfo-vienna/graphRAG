@@ -1,43 +1,98 @@
 import os
 os.environ['HF_HOME'] = '/data/local/sschoendorfer'
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-# from graphRAG import question_rag
-# from utils import get_pipeline_from_model
+
+from huggingface_hub import hf_hub_download
 import json
 import re 
 # from transformers.pipelines.text_generation import TextGenerationPipeline
 import numpy as np
+from transformers import AutoTokenizer, pipeline
+import torch
 
 
-# def benchmark_rag(pipe_cypher: TextGenerationPipeline, pipe_answer: TextGenerationPipeline) -> None:
-#     # function for running the benchmark questions 
-#     with open("/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_questions.txt", "r") as f: 
-#         testset = f.read()
+def generate_answer_qwen(user_prompt: str, system_prompt: str, pipe, **kwargs: dict) -> str:
+    full_prompt = f"System: {system_prompt}\nUser: {user_prompt}\nAssistant:" # combine the system and user prompt into a from that is easily understoof by Qwen
+ 
+    if "max_new_tokens" not in kwargs:
+        kwargs["max_new_tokens"] = 512 # Set a default max_new_tokens if not provided
 
-#     pattern = r"Q:\s*(.+?)\nQuery:\s*(.+?)\nA:\s*(.+?)(?=\nQ:|\Z)"
+    # generate the answer
+    output = pipe(full_prompt,
+                  do_sample=True, # enables sampling and a more varied generation
+                  top_k=5, # take the top 5 most likely tokens at each generation step
+                  top_p=0.9, 
+                  temperature = 0.7, # controls randomness of sampling
+                  **kwargs
+                  )
+    
+    output = output[0]["generated_text"] # Extract the relevant part of the generated text
+    return output.split('Assistant:', 1)[1].strip() # takes only the portion of the text after the "Assistant: "
 
-#     # Find all matches
-#     matches = re.findall(pattern, testset, re.DOTALL)
 
-#     # Parse into a list of dictionaries
-#     parsed_questions = [
-#         {"Question": match[0].strip(), "Query": match[1].strip(), "Answer": match[2].strip()}
-#         for match in matches
-#     ]
+def generate_answer_code_llama(system_prompt: str, user_prompt: str, pipe , **kwargs: dict) -> str:
+    # generates the answer from the code llama model
+    full_prompt = "<s>[INST]<<SYS>>\n{system}\n<</SYS>>\n\n{user}[/INST]\n\n".format(system=f"{system_prompt}",
+                                                                        user=f'{user_prompt}') 
+    if "max_new_tokens" not in kwargs:
+        kwargs["max_new_tokens"] = 512 # The default max length is pretty small, increase the threshold
+    
+    kwargs.setdefault("temperature", 0.3) # controls randomness of sampling 
 
-#     for i in range(80, 100): 
-#         benchmark = []
-#         for question in parsed_questions:
-#             cypher_query, final_answer = question_rag(question["Question"], pipe_cypher, pipe_answer)
-#             benchmark.append({"user_prompt": question["Question"], "cypher_query": cypher_query, 
-#                             "final_answer": final_answer, "score_cypher_automated": "", 
-#                             "score_answer_automated": "", "score_cypher_manual": "", 
-#                             "score_answer_manual": "",
-#                             "score_python_example:":"", 
-#                             "model_cypher": question["Query"], "model_answer": question["Answer"] })
+    output = pipe(full_prompt,
+                      do_sample=True, # enables sampling and a more varied generation
+                      top_k=5, # take the top 5 most likely tokens at each generation step
+                      top_p=0.9,
+                      **kwargs)
+    
+    output = output[0]["generated_text"] # Extract the relevant part of the generated text
+    output = output.split('<</SYS>>', 1)[1].split("[/INST]")[1] # takes only the relevant part of the answer 
+    number_match = re.search(r"-?\d+", output)
+    if number_match:
+        return number_match.group(0)
+    else:
+        return ''
 
-#         with open(f"/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_results/benchmark_results_{i+1}.json", "w") as file:
-#             json.dump(benchmark, file, indent=4)
+def generate_cypher_eval_system_prompt() -> str:
+    return """
+    You are a highly intelligent assistant. Your job is to evaluate cypher queries against a model cypher query.
+    Ignore any escape sequences but pay attention to the direction of the relationships.
+    If the cypher query matches the model exactly, return 1.
+    If the cypher query and the model are not the same, return -1.
+    If the cypher query is None, return -2.
+    
+    IMPORTANT: Only answer with a single number (1, -1, or -2). Do not add any text, explanations, or comments.
+
+    ### Example 1: 
+    Cypher: \n\nMATCH (p:Project {{name: "CDPKit"}})-[:INCLUDED_IN]->(f:Folder) RETURN f.name
+    Model: \\n\\nMATCH (f:Folder)-[:INCLUDED_IN]->(p:Project {{name: 'CDPKit'}}) RETURN f.name
+    Answer: -1
+
+    ### Example 2:
+    Cypher: \n\nMATCH (f:File)-[:INCLUDED_IN]->(fld:Folder {{name: "Base"}}) RETURN f.name
+    Model: \\n\\nMATCH (f:File)-[:INCLUDED_IN]->(folder:Folder {{name: 'Base'}}) RETURN f.name
+    Answer: 1
+    """
+
+def generate_cypher_eval_user_prompt(cypher, model): 
+    return """
+    Cypher: {cypher}
+    Model: {model}
+    """.format(cypher = f"{cypher}", model = f"{model}")
+
+def get_pipeline_from_model(model: str):
+    # this will generate a TextGenerationPipeline for the given model
+    tokenizer = AutoTokenizer.from_pretrained(model,
+                                            padding_side = "left")  # loads the tokenizer for the specified model, padding is added to left side of the input sequence
+   
+    return pipeline(
+        "text-generation", # the pipeline will be used for text generation
+        model=model, # loads the specified model
+        tokenizer=tokenizer,
+        torch_dtype=torch.float16, # precision of the pipeline
+        trust_remote_code=True, # if the model has any non standard behavior 
+        device_map="auto" # automatically maps the model to the hardware that is available (e.g. GPUs)
+        )
 
 
 def testset_evaluation() -> None: 
@@ -79,11 +134,11 @@ def testset_evaluation() -> None:
             with open(file_path, "r") as f: 
                 results = json.load(f)
 
-        specific_questions = results[:17]
-        general_questions = results[17:]
+            specific_questions = results[:17]
+            general_questions = results[17:]
 
-        calculate_metrics(specific_questions, metrics_specific)
-        calculate_metrics(general_questions, metrics_general)
+            calculate_metrics(specific_questions, metrics_specific)
+            calculate_metrics(general_questions, metrics_general)
 
     print("### RESULTS SPECIFIC QUESTIONS ###")
     print("\n")
@@ -213,9 +268,30 @@ def parse_result(result, counts):
 
 
 
-if __name__ == "__main__": 
-    model_answer = "Qwen/Qwen2.5-7B-Instruct"
-    
-    # pipe_answer = get_pipeline_from_model(model_answer)
+def evaluate_cypher():
+    model = "codellama/CodeLlama-13b-Instruct-hf"
+    directory = "/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_results"
+    pipe_cypher = get_pipeline_from_model(model)
+    system_prompt = generate_cypher_eval_system_prompt()
 
-    testset_evaluation()
+    for ix, file in enumerate(sorted(os.listdir(directory), key=lambda x: int(x.split('_')[2].split('.')[0]))):
+        if ix > 0: 
+            break
+        if file.endswith('.json'):
+            file_path = os.path.join(directory, file)
+
+            with open(file_path, "r") as f: 
+                results = json.load(f)
+
+            for q in results: 
+                user_prompt = generate_cypher_eval_user_prompt(q["cypher_query"], q["model_cypher"])
+                q["score_cypher_automated"] = generate_answer_code_llama(system_prompt=system_prompt, user_prompt=user_prompt, pipe=pipe_cypher).strip("\n")
+                print("hello")
+
+
+            
+
+
+
+if __name__ == "__main__": 
+    evaluate_cypher()
