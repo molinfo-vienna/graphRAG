@@ -762,7 +762,7 @@
         "score_overall_automated": "",
         "score_cypher_manual": "-1",
         "score_context_manual:": "0",
-        "score_answer_manual": "-q",
+        "score_answer_manual": "-1",
         "score_code_manual": "1",
         "score_overall_manual": "-1"
     },
