@@ -1,4 +1,4 @@
-from utils import run_query
+from utils.rag_utils import run_query
 from neo4j import Driver
 from transformers.pipelines.text_generation import TextGenerationPipeline
 

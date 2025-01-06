@@ -2,7 +2,7 @@ import os
 os.environ['HF_HOME'] = '/data/local/sschoendorfer'
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-from utils import initialize_neo4j, get_kg_schema, get_pipeline_from_model
+from utils.rag_utils import initialize_neo4j, get_kg_schema, get_pipeline_from_model
 from retriever import retrieve_context
 from generator import generate_rag_prompt, generate_answer_qwen
 import json

@@ -40,11 +40,6 @@ def initialize_neo4j() -> Driver:
     return GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
 
 
-def format_system_prompt(system_prompt: str):
-    # necessary as the prompt will otherwise be interpeted incorrectly 
-    return system_prompt.replace("{", "{{").replace("}", "}}") 
-
-
 def run_query(driver: Driver, query: str, params: dict|None =None) -> list:
     with driver.session() as session: # starts new session
             result = session.run(query, params) # executes the query
@@ -79,6 +74,8 @@ def get_kg_schema() -> str:
         {"relationship": "OF_TYPE", "source": "Parameter", "target": "Class"}
     ]
     """
+
+
 
 if __name__ == "__main__":
      driver = initialize_neo4j()
