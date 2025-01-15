@@ -1,4 +1,4 @@
-from utils import run_query
+from utils.rag_utils import run_query
 from neo4j import Driver
 from transformers.pipelines.text_generation import TextGenerationPipeline
 
@@ -23,7 +23,7 @@ def generate_cypher_query_prompt(schema: str) -> str:
     # generates the prompt for the generation of the cypher query
     # the prompt includes a clear instruction and positive examples
     return """
-    You are experienced with cypher queries. Provide answers in Cypher query language, *strictly* based on the following graph Neo4j schema. Respect the possible direction of relationships and the possible naming of nodes, properties and relationships. Only answer with the query and nothing else.
+    You are experienced with translating questions into cypher queries. Provide answers in Cypher query language, *strictly* based on the following graph Neo4j schema. Respect the possible direction of relationships and the possible naming of nodes, properties and relationships. DO NOT CREATE NEW NODES OR RELATIONSHIPS. Only answer with the query and nothing else.
 
     ### The Schema
 
@@ -38,12 +38,13 @@ def generate_cypher_query_prompt(schema: str) -> str:
     """.format(schema = schema) 
 
 def generate_answer_code_llama(user_prompt: str, system_prompt: str, pipe: TextGenerationPipeline, **kwargs: dict) -> str:
+    # https://medium.com/@silviaonofrei/code-llamas-knowledge-of-neo4j-s-cypher-query-language-54783d2ad421
     # generates the answer from the code llama model
     full_prompt = "<s>[INST]<<SYS>>\n{system}\n<</SYS>>\n\n{user}[/INST]\n\n".format(system=f"{system_prompt}",
                                                                         user=f'{user_prompt}') # format the full prompt in a way that is easily understood by Code LLama 
 
     if "max_new_tokens" not in kwargs:
-        kwargs["max_new_tokens"] = 512 # The default max length is pretty small, increase the threshold
+        kwargs["max_new_tokens"] = 512 # Set max new tokens if not provided
     
     kwargs.setdefault("temperature", 0.7) # controls randomness of sampling 
 

@@ -2,7 +2,7 @@ import os
 os.environ['HF_HOME'] = '/data/local/sschoendorfer'
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-from utils import initialize_neo4j, get_kg_schema, get_pipeline_from_model
+from utils.rag_utils import initialize_neo4j, get_kg_schema, get_pipeline_from_model
 from retriever import retrieve_context
 from generator import generate_rag_prompt, generate_answer_qwen
 import json
@@ -28,37 +28,49 @@ def question_rag(user_prompt: str, pipe_cypher: TextGenerationPipeline, pipe_ans
 
     final_answer = generate_answer_qwen(user_prompt, system_prompt_rag, pipe_answer) # generate the final answer 
 
-    return cypher_query, final_answer
+    return cypher_query, query_result, final_answer
+
 
 def benchmark_rag(pipe_cypher: TextGenerationPipeline, pipe_answer: TextGenerationPipeline) -> None:
     # function for running the benchmark questions 
     with open("/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_questions.txt", "r") as f: 
         testset = f.read()
 
-    pattern = r"Q:\s*(.+?)\nQuery:\s*(.+?)\nA:\s*(.+?)(?=\nQ:|\Z)"
+    pattern = r"Q:\s*(.+?)\nQuery:\s*(.+?)\nC:\s*(.+?)\nA:\s*(.+?)(?=\nQ:|\Z)"
 
     # Find all matches
     matches = re.findall(pattern, testset, re.DOTALL)
 
     # Parse into a list of dictionaries
     parsed_questions = [
-        {"Question": match[0].strip(), "Query": match[1].strip(), "Answer": match[2].strip()}
+        {"Question": match[0].strip(), "Query": match[1].strip(), "Context": match[2].strip(), "Answer": match[3].strip()}
         for match in matches
     ]
 
-    for i in range(80, 100): 
+    for i in range(97, 100): 
         benchmark = []
         for question in parsed_questions:
-            cypher_query, final_answer = question_rag(question["Question"], pipe_cypher, pipe_answer)
+            cypher_query, query_result, final_answer = question_rag(question["Question"], pipe_cypher, pipe_answer)
             benchmark.append({"user_prompt": question["Question"], "cypher_query": cypher_query, 
-                            "final_answer": final_answer, "score_cypher_automated": "", 
-                            "score_answer_automated": "", "score_cypher_manual": "", 
-                            "score_answer_manual": "",
-                            "score_python_example:":"", 
-                            "model_cypher": question["Query"], "model_answer": question["Answer"] })
+                              "retrieved_context": query_result, 
+                                "final_answer": final_answer,
+                                "model_cypher": question["Query"], "model_answer": question["Answer"],
+                                "model_context": question["Context"],
+                                "score_cypher_automated": "", 
+                                "score_context_automated":"",
+                                "score_answer_automated": "", 
+                                "score_code_automated":"",
+                                "score_overall_automated": "", 
+                                "score_cypher_manual": "", 
+                                "score_context_manual":"",
+                                "score_answer_manual": "",
+                                "score_code_manual":"", 
+                                "score_overall_manual": ""
+                                })
 
         with open(f"/data/shared/projects/graphRAG/graphRAG/graphRAG/benchmark_results/benchmark_results_{i+1}.json", "w") as file:
             json.dump(benchmark, file, indent=4)
+
 
 if __name__ == "__main__":
     model_cypher = "codellama/CodeLlama-13b-Instruct-hf"
@@ -69,11 +81,6 @@ if __name__ == "__main__":
     
     pipe_answer = get_pipeline_from_model(model_answer)
 
-    benchmark_rag(pipe_cypher=pipe_cypher, pipe_answer=pipe_answer)
-
-    # cypher_query , answer = question_rag("What methods does the class AtomBondMapping have?", pipe_cypher, pipe_answer)
-   
-    print("Cypher: ", cypher_query)
-    print("Final Answer: ", answer)
+    benchmark_rag(pipe_cypher, pipe_answer)
 
 

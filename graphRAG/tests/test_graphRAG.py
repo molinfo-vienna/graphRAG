@@ -7,7 +7,7 @@ import sys
 
 import pytest
 
-import graphRAG
+import graphRAG_
 
 
 def test_graphRAG_imported():
