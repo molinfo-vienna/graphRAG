@@ -1,6 +1,7 @@
 from transformers.pipelines.text_generation import TextGenerationPipeline
 
 def generate_answer_qwen(user_prompt: str, system_prompt: str, pipe: TextGenerationPipeline, **kwargs: dict) -> str:
+    # https://medium.com/@silviaonofrei/code-llamas-knowledge-of-neo4j-s-cypher-query-language-54783d2ad421
     full_prompt = f"System: {system_prompt}\nUser: {user_prompt}\nAssistant:" # combine the system and user prompt into a from that is easily understoof by Qwen
  
     if "max_new_tokens" not in kwargs:
