@@ -81,6 +81,10 @@ if __name__ == "__main__":
     
     pipe_answer = get_pipeline_from_model(model_answer)
 
-    benchmark_rag(pipe_cypher, pipe_answer)
+    _, _, answer = question_rag("How can I read in molecules", pipe_cypher, pipe_answer)
+    
+    print(answer)
+
+    # benchmark_rag(pipe_cypher, pipe_answer)
 
 

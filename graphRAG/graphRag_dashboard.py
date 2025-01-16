@@ -1,7 +1,14 @@
 from dash import Dash, dcc, html, Input, Output, State, callback_context
 import dash_bootstrap_components as dbc
-from typing import List, Dict, Any
 from graphRAG import question_rag
+from utils.rag_utils import get_pipeline_from_model
+
+# Load models globally to ensure they are loaded only once
+model_cypher = "codellama/CodeLlama-13b-Instruct-hf"
+model_answer = "Qwen/Qwen2.5-7B-Instruct"
+
+pipe_cypher = get_pipeline_from_model(model_cypher)
+pipe_answer = get_pipeline_from_model(model_answer)
 
 
 # Initialize app with suppressed callback exceptions
@@ -33,7 +40,7 @@ chat_layout = html.Div([
             html.Div(
                 [
                     html.Img(
-                        src="https://cdpkit.org/_static/logo.svg",  # Replace with your image URL
+                        src="https://cdpkit.org/_static/logo.svg", 
                         alt="CDPKit Icon",
                         style={"width": "175px", "height": "85px", "marginRight": "30px", "marginBottom": "15px",
                                 "marginTop": "15px"}  # Image size and margin
@@ -49,9 +56,17 @@ chat_layout = html.Div([
         )
     ),
 
-    # Chat history
-    dbc.Row(dbc.Col(html.Div(id="chat-history", className="p-3 border rounded bg-light",
-                             style={"height": "300px", "overflowY": "scroll"}))),
+    dbc.Row(dbc.Col(
+        dcc.Loading(
+            id="loading-indicator",
+            type="circle",  
+            children=[
+                html.Div(id="chat-history", className="p-3 border rounded bg-light",
+                         style={"height": "300px", "overflowY": "scroll"})
+            ],
+            fullscreen=False  # Set True to cover the entire screen while loading
+        )
+    )),
 
     # Input, send button, and clear button
     dbc.Row([
@@ -80,11 +95,10 @@ chat_layout = html.Div([
 # Documentation layout
 docs_layout = html.Div([
     html.H2("About the CDPKit GraphRAG", className="text-center my-5", style={"fontSize": "2rem"}),
-    html.P("Here you can include links or explanations about CDPKit, usage examples, and more.",
-           className="lead", style={"marginTop": "20px"}),
+    html.P("This Graph RAG is meant for answering questions about the CDPKit. It retrieves its information from an external Knoweldge Graph. Currently, its performance is best if you ask specific questions and provide the names of the classes and functions you want to know more about.",
+           className="lead", style={"marginTop": "20px", "marginLeft": "20px", "marginRight": "20px"}),
     html.Ul([
         html.Li(html.A("CDPKit Documentation", href="https://cdpkit.org/", target="_blank")),
-        html.Li(html.A("CDPKit API Documentation", href="https://docs.example.com", target="_blank")),
     ]),
 ])
 
@@ -92,7 +106,7 @@ docs_layout = html.Div([
 app.layout = html.Div([
     dcc.Location(id="url", refresh=False),  # Tracks the current URL
     navbar,  # Navbar at the top
-    html.Div(id="page-content")  # Placeholder for dynamic content
+    html.Div(id="page-content")  
 ])
 
 # Callback to render content based on URL
@@ -117,7 +131,6 @@ def update_active_links(pathname):
     return pathname == "/", pathname == "/about"
 
 
-# Chat interactions callback
 @app.callback(
     [Output("chat-history", "children"), Output("query-input", "value")],
     [
@@ -143,10 +156,17 @@ def handle_chat_interactions(send_clicks, clear_clicks, ex1_clicks, ex2_clicks, 
 
     if triggered_id == "send-button" or triggered_id == "query-input":
         if query:
-            response = f"I have no access to the graph yet, I'm sorry :("
+            try:
+                # Pass the pipelines to the question_rag function
+                _, _,response = question_rag(query, pipe_cypher=pipe_cypher, pipe_answer=pipe_answer)
+            except Exception as e:
+                response = f"An error occurred while processing the query."
+            
+            # Format the new messages
+            response = response.replace("\n", "  \n")
             new_message = html.Div([
-                html.Div(f"{query}", className="text-end text-primary fw-bold mb-2"),
-                html.Div(f"{response}", className="text-start text-primary fw-normal mb-3"),
+                html.Div(f"{query}", className="text-end text-primary fw-bold mb-3"),
+                html.Div(dcc.Markdown(response), className="text-start text-primary fw-normal mb-3"),
             ])
             return chat_history + [new_message], ""
 
@@ -160,14 +180,22 @@ def handle_chat_interactions(send_clicks, clear_clicks, ex1_clicks, ex2_clicks, 
             "example-3": "What can you tell me about the class InteractionType?",
         }
         query = example_queries.get(triggered_id, "")
-        response = f"I have no access to the graph yet, I'm sorry :("
+        try:
+            # Pass the pipelines to the question_rag function for example queries
+            _, _,response = question_rag(query, pipe_cypher=pipe_cypher, pipe_answer=pipe_answer)
+        except Exception as e:
+            response = f"An error occurred while processing the query."
+            
+        response = response.replace("\n", "  \n")
         new_message = html.Div([
-            html.Div(f"{query}", className="text-end text-primary fw-bold mb-2"),
-            html.Div(f"{response}", className="text-start text-primary fw-normal mb-3"),
+            html.Div(f"{query}", className="text-end text-primary fw-bold mb-3"),
+            html.Div(dcc.Markdown(response), className="text-start text-primary fw-normal mb-3"),
         ])
         return chat_history + [new_message], query
 
     return chat_history, ""
 
 if __name__ == '__main__':
-    app.run_server(debug=True, host='0.0.0.0', port=8050)
+    # run this to run the dashboard
+
+    app.run_server(debug=False, host='0.0.0.0', port=8050)
