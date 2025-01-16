@@ -5,6 +5,7 @@ from FolderManager import FolderManager
 from FileManager import FileManager
 from ClassManager import ClassManager
 from FunctionManager import FunctionManager
+from config import neo4j_password, neo4j_uri, neo4j_user
 
 
 class KnowledgeGraphManager(): 
@@ -45,9 +46,9 @@ class KnowledgeGraphManager():
 
 
 if __name__ == "__main__":
-    uri = "neo4j+s://4de35fba.databases.neo4j.io"  
-    username = "neo4j"  
-    password = "87YkRGzIftmB-QU8CvYcLNzHZeFAZkeEQpwtZTEa4PU"  
+    uri = neo4j_uri 
+    username = neo4j_user 
+    password = neo4j_password 
     root_path = "/data/shared/projects/graphRAG/CDPKit/Doc/Doxygen/Python-API/Source/CDPL/"
     cdp_folders = [root_path + "Chem",
                    root_path + "Pharm",

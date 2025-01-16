@@ -7,6 +7,7 @@ from neo4j import GraphDatabase, Driver
 from transformers import AutoTokenizer, pipeline
 from transformers.pipelines.text_generation import TextGenerationPipeline
 import torch
+from config import neo4j_password, neo4j_uri, neo4j_user
 
 
 def get_pipeline_from_model(model: str) -> TextGenerationPipeline:
@@ -34,9 +35,6 @@ def get_pipelines(model_cypher: str, model_answer: str) -> tuple[TextGenerationP
 
 def initialize_neo4j() -> Driver:
     # initializes the neo4j driver necessary to query the KG
-    neo4j_uri = "neo4j+s://4de35fba.databases.neo4j.io"  
-    neo4j_user = "neo4j"  
-    neo4j_password = "87YkRGzIftmB-QU8CvYcLNzHZeFAZkeEQpwtZTEa4PU"  
     return GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
 
 
