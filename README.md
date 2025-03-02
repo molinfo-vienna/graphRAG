@@ -85,7 +85,7 @@ python graphRAG/graphRag_dashboard.py
 ```
 It has a chat-like interface with example questions and can be used to directly question the system about the CDPKit.
 
-![dashboard](images/dasboard_image.png)
+![dashboard](graphRAG/images/dasboard_image.png)
 
 #### Direct Usage of the Graph RAG System from the Command Line 
 
