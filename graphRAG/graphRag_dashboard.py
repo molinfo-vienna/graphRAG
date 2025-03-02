@@ -95,11 +95,12 @@ chat_layout = html.Div([
 # Documentation layout
 docs_layout = html.Div([
     html.H2("About the CDPKit GraphRAG", className="text-center my-5", style={"fontSize": "2rem"}),
-    html.P("This Graph RAG is meant for answering questions about the CDPKit. It retrieves its information from an external Knoweldge Graph. Currently, its performance is best if you ask specific questions and provide the names of the classes and functions you want to know more about.",
+    html.P("This Graph RAG is meant for answering questions about the CDPKit. It retrieves its information from an external Knowledge Graph. Currently, its performance is best if you ask specific questions and provide the names of the classes and functions you want to know more about.",
            className="lead", style={"marginTop": "20px", "marginLeft": "20px", "marginRight": "20px"}),
     html.Ul([
+        html.Li(html.A("Graph RAG Repository", href="https://github.com/molinfo-vienna/graphRAG?tab=readme-ov-file", target="_blank")),
         html.Li(html.A("CDPKit Documentation", href="https://cdpkit.org/", target="_blank")),
-    ]),
+])
 ])
 
 # Main layout
