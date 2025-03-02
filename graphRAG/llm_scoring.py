@@ -1,5 +1,5 @@
 import os
-os.environ['HF_HOME'] = '/data/local/sschoendorfer'
+os.environ['HF_HOME'] = os.getenv("MODEL_LOCATION")
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 from huggingface_hub import hf_hub_download

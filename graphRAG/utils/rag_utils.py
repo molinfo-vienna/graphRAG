@@ -1,5 +1,5 @@
 import os
-os.environ['HF_HOME'] = '/data/local/sschoendorfer'
+os.environ['HF_HOME'] = os.getenv("MODEL_LOCATION")
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 from huggingface_hub import hf_hub_download
@@ -7,7 +7,7 @@ from neo4j import GraphDatabase, Driver
 from transformers import AutoTokenizer, pipeline
 from transformers.pipelines.text_generation import TextGenerationPipeline
 import torch
-from config import neo4j_password, neo4j_uri, neo4j_user
+
 
 
 def get_pipeline_from_model(model: str) -> TextGenerationPipeline:
@@ -35,7 +35,7 @@ def get_pipelines(model_cypher: str, model_answer: str) -> tuple[TextGenerationP
 
 def initialize_neo4j() -> Driver:
     # initializes the neo4j driver necessary to query the KG
-    return GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
+    return GraphDatabase.driver(os.getenv("NEO4j_URI"), auth=(os.getenv("NEO4j_USER"), os.getenv("NEO4j_PASSWORD")))
 
 
 def run_query(driver: Driver, query: str, params: dict|None =None) -> list:

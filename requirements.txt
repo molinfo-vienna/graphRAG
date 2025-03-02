@@ -1,0 +1,103 @@
+accelerate==1.2.1
+aiohttp==3.9.5
+aiosignal==1.3.1
+annotated-types==0.7.0
+anyio==4.4.0
+attrs==23.2.0
+beautifulsoup4==4.12.3
+blinker @ file:///croot/blinker_1696539051175/work
+certifi==2024.7.4
+charset-normalizer==3.3.2
+click @ file:///croot/click_1698129812380/work
+dash==2.17.1
+dash-bootstrap-components==1.6.0
+dash-core-components==2.0.0
+dash-html-components==2.0.0
+dash-table==5.0.0
+dataclasses-json==0.6.7
+Deprecated==1.2.14
+dirtyjson==1.0.8
+distro==1.9.0
+filelock @ file:///croot/filelock_1700591183607/work
+Flask @ file:///croot/flask_1716545870149/work
+frozenlist==1.4.1
+fsspec @ file:///croot/fsspec_1714461537038/work
+gmpy2 @ file:///work/ci_py311/gmpy2_1676839849213/work
+greenlet==3.0.3
+h11==0.14.0
+httpcore==1.0.5
+httpx==0.27.0
+huggingface-hub==0.24.1
+idna==3.7
+importlib_metadata==8.1.0
+itsdangerous @ file:///croot/itsdangerous_1716533337253/work
+Jinja2 @ file:///croot/jinja2_1716993405101/work
+joblib==1.4.2
+llama-cloud==0.0.9
+llama-index==0.10.57
+llama-index-agent-openai==0.2.9
+llama-index-cli==0.1.12
+llama-index-core==0.10.57
+llama-index-embeddings-openai==0.1.11
+llama-index-indices-managed-llama-cloud==0.2.5
+llama-index-legacy==0.9.48
+llama-index-llms-openai==0.1.27
+llama-index-multi-modal-llms-openai==0.1.8
+llama-index-program-openai==0.1.7
+llama-index-question-gen-openai==0.1.3
+llama-index-readers-file==0.1.30
+llama-index-readers-llama-parse==0.1.6
+llama-parse==0.4.9
+MarkupSafe @ file:///croot/markupsafe_1704205993651/work
+marshmallow==3.21.3
+mkl-fft @ file:///croot/mkl_fft_1695058164594/work
+mkl-random @ file:///croot/mkl_random_1695059800811/work
+mkl-service==2.4.0
+mpmath @ file:///croot/mpmath_1690848262763/work
+multidict==6.0.5
+mypy-extensions==1.0.0
+neo4j==5.22.0
+nest-asyncio==1.6.0
+networkx @ file:///croot/networkx_1720002482208/work
+nltk==3.8.1
+numpy @ file:///croot/numpy_and_numpy_base_1708638617955/work/dist/numpy-1.26.4-cp311-cp311-linux_x86_64.whl#sha256=5f96f274d410a1682519282ae769c877d32fdbf171aa8badec7bf5e1d3a1748a
+openai==1.37.0
+packaging==24.1
+pandas==2.2.2
+pillow==10.4.0
+plotly==5.23.0
+psutil==6.0.0
+pydantic==2.8.2
+pydantic_core==2.20.1
+pypdf==4.3.1
+python-dateutil==2.9.0.post0
+pytz==2024.1
+PyYAML==6.0.1
+regex==2024.5.15
+requests==2.32.3
+retrying==1.3.4
+safetensors==0.4.3
+scikit-learn==1.5.1
+scipy==1.14.0
+six==1.16.0
+sniffio==1.3.1
+soupsieve==2.5
+SQLAlchemy==2.0.31
+striprtf==0.0.26
+sympy @ file:///croot/sympy_1701397643339/work
+tenacity==8.5.0
+threadpoolctl==3.5.0
+tiktoken==0.7.0
+tokenizers==0.21.0
+torch @ file:///opt/conda/envs/bld/conda-bld/pytorch-select_1719512383855/work
+tqdm==4.66.4
+transformers==4.47.1
+triton @ file:///opt/conda/envs/bld/conda-bld/torchtriton_1721056825793/work/python
+typing-inspect==0.9.0
+typing_extensions @ file:///croot/typing_extensions_1715268824938/work
+tzdata==2024.1
+urllib3==2.2.2
+Werkzeug @ file:///croot/werkzeug_1716533313107/work
+wrapt==1.16.0
+yarl==1.9.4
+zipp==3.19.2

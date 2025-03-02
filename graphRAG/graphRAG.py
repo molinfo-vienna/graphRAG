@@ -1,5 +1,5 @@
 import os
-os.environ['HF_HOME'] = '/data/local/sschoendorfer'
+os.environ['HF_HOME'] = os.getenv("MODEL_LOCATION")
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 from utils.rag_utils import initialize_neo4j, get_kg_schema, get_pipeline_from_model
@@ -8,6 +8,7 @@ from generator import generate_rag_prompt, generate_answer_qwen
 import json
 import re 
 from transformers.pipelines.text_generation import TextGenerationPipeline
+import argparse
 
 # Base idea from this article: 
 # https://medium.com/@silviaonofrei/code-llamas-knowledge-of-neo4j-s-cypher-query-language-54783d2ad421
@@ -81,7 +82,17 @@ if __name__ == "__main__":
     
     pipe_answer = get_pipeline_from_model(model_answer)
 
-    _, _, answer = question_rag("How can I read in molecules", pipe_cypher, pipe_answer)
+    parser = argparse.ArgumentParser(description="CDPKit Graph RAG: Ask a question via command line")
+
+    parser.add_argument(
+        "user_query",
+        type=str,
+        help="The question you want to ask the CDPKit Graph RAG system."
+    )
+
+    args = parser.parse_args()
+
+    _, _, answer = question_rag(args.user_query, pipe_cypher, pipe_answer)
     
     print(answer)
 
