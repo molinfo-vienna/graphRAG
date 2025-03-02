@@ -1,7 +1,20 @@
 graphRAG
 ==============================
 
-A Graph RAG System for the CDPKit
+**A Graph RAG System for the CDPKit**
+
+## Table of Contents
+
+- [About](#about)
+- [Getting Started](#getting-started)
+    - [Installation](#installation)
+    - [Build the Knowledge Graph](#build-the-knowledge-graph)
+    - [Pretrained Large Language Models](#pretrained-large-language-models)
+    - [Basic Usage](#basic-usage)
+        - [Graph RAG Dashboard](#graph-rag-dashboard)
+        - [Direct Usage of the Graph RAG System from the Command Line](#direct-usage-of-the-graph-rag-system-from-the-command-line)
+- [Copyright](#copyright)
+    - [Acknowledgments](#acknowledgements)
 
 ## About
 
