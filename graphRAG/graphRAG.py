@@ -48,7 +48,7 @@ def benchmark_rag(pipe_cypher: TextGenerationPipeline, pipe_answer: TextGenerati
         for match in matches
     ]
 
-    for i in range(97, 100): 
+    for i in range(0, 100): 
         benchmark = []
         for question in parsed_questions:
             cypher_query, query_result, final_answer = question_rag(question["Question"], pipe_cypher, pipe_answer)

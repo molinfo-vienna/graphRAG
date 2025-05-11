@@ -65,7 +65,7 @@ if __name__ == "__main__":
                    root_path + "Util",
                    root_path + "Vis"]
     for folder in cdp_folders: 
-        all_files_info = DocParser(folder).parse_files()
+        all_files_info = DocParser(folder).parse_dir()
         cdpkit_graph_manager = KnowledgeGraphManager(uri, username, password, project_name="CDPKit", info_dict=all_files_info)
         cdpkit_graph_manager.create_graph()
         cdpkit_graph_manager.close()

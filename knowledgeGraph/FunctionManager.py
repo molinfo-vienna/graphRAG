@@ -2,7 +2,6 @@ from neo4j import Driver, Transaction
 from DecoratorManager import DecoratorManager
 from ParameterManager import ParameterManager
 from TypeManager import TypeManager
-from ClassManager import ClassManager
 import json
 
 class FunctionManager(): 
@@ -60,6 +59,7 @@ class FunctionManager():
 
     def _create_function_inputs(self, tx: Transaction, function_dict: dict) -> None: 
         # creates the nodes and relationships for the function inputs
+        from ClassManager import ClassManager
         function_name = function_dict["name"]
         function_comment = function_dict["comment"]
         parameter_dict = json.dumps(self.ParameterManager._parse_parameters(function_dict["params"]))
